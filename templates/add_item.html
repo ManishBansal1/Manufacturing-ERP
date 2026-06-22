@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Add Item</h2>
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>Item Code</label>
+
+<input
+type="text"
+name="item_code"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>Item Name</label>
+
+<input
+type="text"
+name="item_name"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>Item Type</label>
+
+<select
+name="item_type"
+class="form-control">
+
+<option value="Raw Material">
+Raw Material
+</option>
+
+<option value="Intermediate Material">
+Intermediate Material
+</option>
+
+<option value="Assembled Goods">
+Assembled Goods
+</option>
+
+<option value="Scrap">
+    Scrap
+</option>
+
+</select>
+
+</div>
+
+<div class="mb-3">
+
+<label>Unit</label>
+
+<input
+type="text"
+name="unit"
+class="form-control"
+value="PCS">
+
+</div>
+
+<div class="mb-3">
+
+<label>Production Stage</label>
+
+<select
+    name="production_stage_id"
+    class="form-control">
+
+    <option value="">
+        -- Select Stage --
+    </option>
+
+    {% for stage in stage_list %}
+
+    <option value="{{ stage.id }}">
+        {{ stage.stage_no }} -
+        {{ stage.stage_name }}
+    </option>
+
+    {% endfor %}
+
+</select>
+
+</div>
+
+<div class="mb-3">
+
+<label>Finished Good Mapping</label>
+
+<select
+    name="finished_good_id"
+    class="form-control">
+
+    <option value="">
+        -- Select Finished Good --
+    </option>
+
+    {% for fg in fg_list %}
+
+    <option value="{{ fg.id }}">
+        {{ fg.fg_name }}
+    </option>
+
+    {% endfor %}
+
+</select>
+
+</div>
+
+<button
+type="submit"
+class="btn btn-success">
+
+Save
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

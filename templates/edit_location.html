@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Edit Location</h2>
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>Location Code</label>
+
+<input
+type="text"
+name="location_code"
+value="{{ location.location_code }}"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>Location Name</label>
+
+<input
+type="text"
+name="location_name"
+value="{{ location.location_name }}"
+class="form-control"
+required>
+
+</div>
+
+<button
+type="submit"
+class="btn btn-success">
+
+Update
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

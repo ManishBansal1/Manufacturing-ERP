@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Edit Production Stage</h2>
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>Stage Number</label>
+
+<input
+type="number"
+name="stage_no"
+value="{{ stage.stage_no }}"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>Stage Name</label>
+
+<input
+type="text"
+name="stage_name"
+value="{{ stage.stage_name }}"
+class="form-control"
+required>
+
+</div>
+
+<button
+type="submit"
+class="btn btn-success">
+
+Update
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Edit Finished Good</h2>
+
+<form method="POST">
+
+<div class="mb-3">
+<label>FG Code</label>
+<input
+type="text"
+name="fg_code"
+value="{{ fg.fg_code }}"
+class="form-control">
+</div>
+
+<div class="mb-3">
+<label>FG Name</label>
+<input
+type="text"
+name="fg_name"
+value="{{ fg.fg_name }}"
+class="form-control">
+</div>
+
+<div class="mb-3">
+<label>PL Number</label>
+<input
+type="text"
+name="pl_number"
+value="{{ fg.pl_number }}"
+class="form-control">
+</div>
+
+<div class="mb-3">
+<label>UVAM Reference</label>
+<textarea
+name="uvam_reference"
+class="form-control">{{ fg.uvam_reference }}</textarea>
+</div>
+
+<button
+type="submit"
+class="btn btn-success">
+
+Update
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

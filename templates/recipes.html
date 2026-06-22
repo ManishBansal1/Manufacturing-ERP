@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Recipe Master</h2>
+
+    <a href="/recipes/add"
+       class="btn btn-primary mb-3">
+
+        Add Recipe
+
+    </a>
+
+    <table class="table table-bordered">
+
+        <thead>
+
+            <tr>
+
+                <th>Recipe Name</th>
+                <th>Output Item</th>
+                <th>Stage</th>
+                <th>Output Qty</th>
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for recipe in recipe_list %}
+
+            <tr>
+
+                <td>
+                    {{ recipe.recipe_name }}
+                </td>
+
+                <td>
+                    {{ recipe.output_item.item_name }}
+                </td>
+
+                <td>
+
+                    {% if recipe.production_stage %}
+
+                        {{ recipe.production_stage.stage_name }}
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ recipe.output_qty }}
+                </td>
+
+                <td>
+
+                    <a href="/recipes/edit/{{ recipe.id }}"
+                       class="btn btn-warning btn-sm">
+
+                        Edit
+
+                    </a>
+
+                    <a href="/recipes/details/{{ recipe.id }}"
+                        class="btn btn-primary btn-sm">
+                        BOM
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

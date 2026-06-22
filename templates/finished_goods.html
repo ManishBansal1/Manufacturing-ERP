@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Finished Goods</h2>
+
+<a href="/finished-goods/add"
+class="btn btn-primary mb-3">
+
+Add Finished Good
+
+</a>
+
+<table class="table table-bordered">
+
+<tr>
+
+<th>ID</th>
+<th>FG Code</th>
+<th>FG Name</th>
+<th>PL Number</th>
+<th>UVAM Ref</th>
+<th>Action</th>
+
+</tr>
+
+{% for fg in fg_list %}
+
+<tr>
+
+<td>{{ fg.id }}</td>
+<td>{{ fg.fg_code }}</td>
+<td>{{ fg.fg_name }}</td>
+<td>{{ fg.pl_number }}</td>
+<td>{{ fg.uvam_reference }}</td>
+<td>
+    <a
+        href="/finished-goods/edit/{{ fg.id }}"
+        class="btn btn-warning btn-sm">
+        Edit
+    </a>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+{% endblock %}

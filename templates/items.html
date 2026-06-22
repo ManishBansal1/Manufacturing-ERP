@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Item Master</h2>
+
+    <a href="/items/add"
+       class="btn btn-primary mb-3">
+
+        Add Item
+
+    </a>
+
+    <table class="table table-bordered">
+
+        <thead>
+
+            <tr>
+
+                <th>Code</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Unit</th>
+                <th>Stage</th>
+                <th>Finished Good</th>
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for item in item_list %}
+
+            <tr>
+
+                <td>{{ item.item_code }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.item_type }}</td>
+                <td>{{ item.unit }}</td>
+                <td>
+
+                    {% if item.production_stage_rel %}
+
+                    {{ item.production_stage_rel.stage_name }}
+
+                    {% endif %}
+
+                </td>
+                <td>
+                    {{ item.finished_good.fg_name if item.finished_good else '' }}
+                </td>
+                <td>
+
+                    <a href="/items/edit/{{ item.id }}"
+                       class="btn btn-sm btn-warning">
+
+                        Edit
+
+                    </a>
+
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

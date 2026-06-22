@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Add Finished Good</h2>
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>FG Code</label>
+
+<input
+type="text"
+name="fg_code"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>FG Name</label>
+
+<input
+type="text"
+name="fg_name"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+    <label>PL Number</label>
+    <input
+        type="text"
+        name="pl_number"
+        class="form-control">
+</div>
+
+<div class="mb-3">
+    <label>UVAM Reference / Description</label>
+    <textarea
+        name="uvam_reference"
+        class="form-control"
+        rows="3"></textarea>
+</div>
+
+<button
+type="submit"
+class="btn btn-success">
+
+Save
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}
