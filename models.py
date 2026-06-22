@@ -281,3 +281,102 @@ class RecipeByProduct(db.Model):
     byproduct_item = db.relationship(
     "ItemMaster"
     )
+
+class InventoryLedger(db.Model):
+
+    __tablename__ = "inventory_ledger"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    trans_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey("location_master.id"),
+        nullable=False
+    )
+
+    qty_in = db.Column(
+        db.Float,
+        default=0
+    )
+
+    qty_out = db.Column(
+        db.Float,
+        default=0
+    )
+
+    reference_type = db.Column(
+        db.String(50)
+    )
+
+    reference_id = db.Column(
+        db.Integer
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+
+    location = db.relationship(
+        "LocationMaster"
+    )
+
+class ProductionEntry(db.Model):
+
+    __tablename__ = "production_entry"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    production_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    recipe_id = db.Column(
+        db.Integer,
+        db.ForeignKey("recipe_header.id"),
+        nullable=False
+    )
+
+    production_qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey("location_master.id"),
+        nullable=False
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    recipe = db.relationship(
+        "RecipeHeader"
+    )
+
+    location = db.relationship(
+        "LocationMaster"
+    )

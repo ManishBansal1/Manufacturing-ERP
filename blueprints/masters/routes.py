@@ -469,20 +469,30 @@ def recipe_details(id):
         ItemMaster.item_name
     ).all()
 
-    inputs = RecipeInput.query.filter_by(
-        recipe_id=id
+    #inputs = RecipeInput.query.filter_by(
+    #    recipe_id=id
+    #).all()
+
+    #byproducts = RecipeByProduct.query.filter_by(
+    #    recipe_id=id
+    #).all()
+
+    input_rows = RecipeInput.query.filter_by(
+    recipe_id=id
     ).all()
 
-    byproducts = RecipeByProduct.query.filter_by(
-        recipe_id=id
+    byproduct_rows = RecipeByProduct.query.filter_by(
+    recipe_id=id
     ).all()
 
     return render_template(
         "recipe_details.html",
         recipe=recipe,
         item_list=item_list,
-        inputs=inputs,
-        byproducts=byproducts
+        input_rows=input_rows,
+        byproduct_rows=byproduct_rows
+        #inputs=inputs,
+        #byproducts=byproducts
     )
 
 @masters_bp.route(
