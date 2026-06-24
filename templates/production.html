@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+    Production Entries
+
+</h2>
+
+<a
+    href="/production/add"
+    class="btn btn-primary mb-3">
+
+    Add Production Entry
+
+</a>
+
+<table class="table table-bordered">
+
+    <thead>
+
+        <tr>
+
+            <th>Date</th>
+            <th>Finished Good</th>
+            <th>Recipe</th>
+            <th>Qty</th>
+            <th>Location</th>
+            <th>Edit</th>
+            <th>Delete</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for row in production_list %}
+
+        <tr>
+
+            <td>
+
+                {{ row.production_date }}
+
+            </td>
+
+             <td>
+                {{ row.recipe.output_item.finished_good.fg_name }}
+            </td>
+
+            <td>
+
+                {{ row.recipe.recipe_name }}
+
+            </td>
+
+            <td>
+
+                {{ row.production_qty }}
+
+            </td>
+
+            <td>
+
+                {{ row.location.location_name }}
+
+            </td>
+
+            <td>
+
+                <a
+                    href="/production/edit/{{ row.id }}"
+                    class="btn btn-warning btn-sm">
+
+                    Edit
+
+                </a>
+
+            </td>
+
+            <td>
+
+                <a
+                    href="/production/delete/{{ row.id }}"
+                    class="btn btn-danger btn-sm">
+
+                    Delete
+
+                </a>
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

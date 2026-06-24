@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+    Add Production Entry
+
+</h2>
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>
+
+Production Date
+
+</label>
+
+<input
+type="date"
+name="production_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>
+
+Finished Good
+
+</label>
+
+<select
+    id="fg_select"
+    class="form-control">
+
+    <option value="">
+        Select FG
+    </option>
+
+    {% for fg in fg_list %}
+
+    <option value="{{ fg.id }}">
+
+        {{ fg.fg_name }}
+
+    </option>
+
+    {% endfor %}
+
+</select>
+
+</div>
+
+
+<div class="mb-3">
+
+<label>
+
+Recipe
+
+</label>
+
+<select
+name="recipe_id"
+id="recipe_select"
+class="form-control"
+required>
+
+<option value="">
+    Select Recipe
+</option>
+
+{% for recipe in recipe_list %}
+
+<option
+    value="{{ recipe.id }}"
+    data-fg="{{ recipe.output_item.finished_good_id }}">
+
+    {{ recipe.recipe_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="mb-3">
+
+<label>
+
+Production Qty
+
+</label>
+
+<input
+type="number"
+step="0.0001"
+name="production_qty"
+class="form-control"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>
+
+Location
+
+</label>
+
+<select
+name="location_id"
+class="form-control"
+required>
+
+{% for location in location_list %}
+
+<option value="{{ location.id }}">
+
+{{ location.location_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="mb-3">
+
+<label>
+
+Remarks
+
+</label>
+
+<textarea
+name="remarks"
+class="form-control"></textarea>
+
+</div>
+
+<button
+type="submit"
+class="btn btn-success">
+
+Save Entry
+
+</button>
+
+<script>
+
+const fgSelect =
+    document.getElementById(
+        "fg_select"
+    );
+
+const recipeSelect =
+    document.getElementById(
+        "recipe_select"
+    );
+
+fgSelect.addEventListener(
+    "change",
+    function() {
+
+        let fgId = this.value;
+
+        recipeSelect.value = "";
+
+        for (
+            let option of recipeSelect.options
+        ) {
+
+            if (!option.value)
+                continue;
+
+            option.hidden =
+                option.dataset.fg !== fgId;
+        }
+    }
+);
+
+</script>
+
+</form>
+
+{% endblock %}
+
+<script>
+
+document
+.getElementById("fg_select")
+.addEventListener(
+    "change",
+    function () {
+
+        let fgId = this.value;
+
+        let recipeSelect =
+            document.getElementById(
+                "recipe_select"
+            );
+
+        for (
+            let option of recipeSelect.options
+        ) {
+
+            if (
+                !fgId ||
+                option.dataset.fg === fgId
+            ) {
+
+                option.hidden = false;
+
+            }
+            else {
+
+                option.hidden = true;
+
+            }
+        }
+    }
+);
+
+</script>

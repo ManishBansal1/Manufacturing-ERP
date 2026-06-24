@@ -380,3 +380,48 @@ class ProductionEntry(db.Model):
     location = db.relationship(
         "LocationMaster"
     )
+
+    details = db.relationship(
+    "ProductionEntryDetail",
+    backref="production_entry",
+    cascade="all, delete-orphan"
+    )
+
+class ProductionEntryDetail(db.Model):
+
+    __tablename__ = "production_entry_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    production_entry_id = db.Column(
+        db.Integer,
+        db.ForeignKey("production_entry.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    transaction_type = db.Column(
+        db.String(20),
+        nullable=False
+    )
+    # INPUT
+    # OUTPUT
+    # SCRAP
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+

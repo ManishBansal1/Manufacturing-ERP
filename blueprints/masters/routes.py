@@ -7,6 +7,8 @@ from flask import (
 
 from flask_login import login_required
 
+from datetime import date
+
 from models import db
 from models import FinishedGood
 from models import ItemMaster
@@ -15,6 +17,9 @@ from models import ProductionStageMaster
 from models import RecipeHeader
 from models import RecipeInput
 from models import RecipeByProduct
+from models import ProductionEntry
+from models import ProductionEntryDetail
+from models import InventoryLedger
 
 
 masters_bp = Blueprint(
@@ -563,4 +568,225 @@ def save_recipe_details(id):
             "masters.recipe_details",
             id=id
         )
+    )
+
+@masters_bp.route("/production")
+@login_required
+def production():
+
+    production_list = ProductionEntry.query.order_by(
+        ProductionEntry.production_date.desc()
+    ).all()
+
+    return render_template(
+        "production.html",
+        production_list=production_list
+    )
+
+@masters_bp.route(
+    "/production/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_production():
+
+    recipe_list = RecipeHeader.query.order_by(
+        RecipeHeader.recipe_name
+    ).all()
+
+    location_list = LocationMaster.query.order_by(
+        LocationMaster.location_name
+    ).all()
+
+    fg_list = FinishedGood.query.order_by(
+    FinishedGood.fg_name
+    ).all()
+
+    if request.method == "POST":
+
+        production = ProductionEntry(
+
+            production_date=date.fromisoformat(
+                request.form["production_date"]
+            ),
+
+            recipe_id=request.form[
+                "recipe_id"
+            ],
+
+            production_qty=float(
+                request.form[
+                    "production_qty"
+                ]
+            ),
+
+            location_id=request.form[
+                "location_id"
+            ],
+
+            remarks=request.form[
+                "remarks"
+            ]
+        )
+
+        db.session.add(production)
+
+        db.session.flush()
+
+        recipe = RecipeHeader.query.get(
+            production.recipe_id
+        )
+
+        factor = (
+            production.production_qty
+            /
+            recipe.output_qty
+        )
+
+        for row in recipe.inputs:
+
+            qty = row.input_qty * factor
+
+            detail = ProductionEntryDetail(
+
+                production_entry_id=
+                production.id,
+
+                item_id=
+                row.input_item_id,
+
+                qty=qty,
+
+                transaction_type="INPUT"
+            )
+
+            db.session.add(detail)
+
+            ledger = InventoryLedger(
+
+                trans_date=
+                production.production_date,
+
+                item_id=
+                row.input_item_id,
+
+                location_id=
+                production.location_id,
+
+                qty_out=qty,
+
+                reference_type=
+                "PRODUCTION",
+
+                reference_id=
+                production.id,
+
+                remarks=
+                "Material Consumption"
+            )
+
+            db.session.add(ledger)
+
+        output_qty = (
+        recipe.output_qty
+        * factor
+        )
+
+        detail = ProductionEntryDetail(
+
+            production_entry_id=
+            production.id,
+
+            item_id=
+            recipe.output_item_id,
+
+            qty=output_qty,
+
+            transaction_type="OUTPUT"
+        )
+
+        db.session.add(detail)
+
+        ledger = InventoryLedger(
+
+            trans_date=
+            production.production_date,
+
+            item_id=
+            recipe.output_item_id,
+
+            location_id=
+            production.location_id,
+
+            qty_in=output_qty,
+
+            reference_type=
+            "PRODUCTION",
+
+            reference_id=
+            production.id,
+
+            remarks=
+            "Production Output"
+        )
+
+        db.session.add(ledger)
+
+        for row in recipe.byproducts:
+
+            qty = row.byproduct_qty * factor
+
+            detail = ProductionEntryDetail(
+
+                production_entry_id=
+                production.id,
+
+                item_id=
+                row.byproduct_item_id,
+
+                qty=qty,
+
+                transaction_type="SCRAP"
+            )
+
+            db.session.add(detail)
+
+            ledger = InventoryLedger(
+
+                trans_date=
+                production.production_date,
+
+                item_id=
+                row.byproduct_item_id,
+
+                location_id=
+                production.location_id,
+
+                qty_in=qty,
+
+                reference_type=
+                "PRODUCTION",
+
+                reference_id=
+                production.id,
+
+                remarks=
+                "Byproduct / Scrap"
+            )
+
+            db.session.add(ledger)
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.production"
+            )
+        )
+
+    return render_template(
+        "add_production.html",
+        recipe_list=recipe_list,
+        location_list=location_list,
+        fg_list=fg_list
     )
