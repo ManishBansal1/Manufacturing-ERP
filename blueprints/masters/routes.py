@@ -22,6 +22,8 @@ from models import RecipeByProduct
 from models import ProductionEntry
 from models import ProductionEntryDetail
 from models import InventoryLedger
+from models import OpeningStock
+from models import OpeningStockDetail
 
 
 masters_bp = Blueprint(
@@ -1059,5 +1061,146 @@ def inventory_detail(item_id):
         item=item,
 
         movement=movement
+
+    )
+
+@masters_bp.route("/opening-stock")
+@login_required
+def opening_stock():
+
+    opening_list = OpeningStock.query.order_by(
+        OpeningStock.opening_date.desc(),
+        OpeningStock.id.desc()
+    ).all()
+
+    return render_template(
+        "opening_stock.html",
+        opening_list=opening_list
+    )
+
+@masters_bp.route(
+    "/opening-stock/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_opening_stock():
+
+    item_list = ItemMaster.query.order_by(
+        ItemMaster.item_name
+    ).all()
+
+    location_list = LocationMaster.query.order_by(
+        LocationMaster.location_name
+    ).all()
+
+    if request.method == "POST":
+
+        opening = OpeningStock(
+
+        opening_date=date.fromisoformat(
+            request.form["opening_date"]
+        ),
+
+        location_id=request.form[
+            "location_id"
+        ],
+
+        remarks=request.form[
+            "remarks"
+        ]
+    )
+
+        db.session.add(opening)
+
+        db.session.flush()
+
+        item_ids = request.form.getlist(
+            "item_id"
+        )
+
+        qtys = request.form.getlist(
+            "qty"
+        )
+
+        for item_id, qty in zip(
+            item_ids,
+            qtys
+        ):
+
+            if not item_id or not qty:
+
+                continue
+
+            detail = OpeningStockDetail(
+
+                opening_stock_id=
+                opening.id,
+
+                item_id=item_id,
+
+                qty=float(qty)
+
+            )
+
+            db.session.add(detail)
+
+            ledger = InventoryLedger(
+
+                trans_date=
+                opening.opening_date,
+
+                item_id=item_id,
+
+                location_id=
+                opening.location_id,
+
+                qty_in=float(qty),
+
+                qty_out=0,
+
+                reference_type=
+                "OPENING",
+
+                reference_id=
+                opening.id,
+
+                remarks=
+                "Opening Stock"
+
+            )
+
+            db.session.add(ledger)
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.opening_stock"
+            )
+        )
+
+    return render_template(
+
+        "add_opening_stock.html",
+
+        item_list=item_list,
+
+        location_list=location_list
+
+    )
+
+@masters_bp.route(
+    "/opening-stock/view/<int:id>"
+)
+@login_required
+def view_opening_stock(id):
+
+    opening = OpeningStock.query.get_or_404(id)
+
+    return render_template(
+
+        "view_opening_stock.html",
+
+        opening=opening
 
     )

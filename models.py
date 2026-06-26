@@ -425,3 +425,68 @@ class ProductionEntryDetail(db.Model):
         "ItemMaster"
     )
 
+class OpeningStock(db.Model):
+
+    __tablename__ = "opening_stock"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    opening_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey("location_master.id"),
+        nullable=False
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    location = db.relationship(
+        "LocationMaster"
+    )
+
+    details = db.relationship(
+        "OpeningStockDetail",
+        backref="opening_stock",
+        cascade="all, delete-orphan"
+    )
+
+
+class OpeningStockDetail(db.Model):
+
+    __tablename__ = "opening_stock_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    opening_stock_id = db.Column(
+        db.Integer,
+        db.ForeignKey("opening_stock.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+

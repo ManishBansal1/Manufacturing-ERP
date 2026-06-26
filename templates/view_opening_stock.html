@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Opening Stock Voucher
+
+</h2>
+
+<table class="table table-bordered">
+
+<tr>
+
+<th width="200">
+
+Date
+
+</th>
+
+<td>
+
+{{ opening.opening_date }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Location
+
+</th>
+
+<td>
+
+{{ opening.location.location_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Remarks
+
+</th>
+
+<td>
+
+{{ opening.remarks }}
+
+</td>
+
+</tr>
+
+</table>
+
+<h4>
+
+Items
+
+</h4>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>
+
+Item Code
+
+</th>
+
+<th>
+
+Item Name
+
+</th>
+
+<th>
+
+Qty
+
+</th>
+
+<th>
+
+Unit
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in opening.details %}
+
+<tr>
+
+<td>
+
+{{ row.item.item_code }}
+
+</td>
+
+<td>
+
+{{ row.item.item_name }}
+
+</td>
+
+<td>
+
+{{ "%.0f"|format(row.qty) }}
+
+</td>
+
+<td>
+
+{{ row.item.unit }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<a
+href="/opening-stock"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+{% endblock %}
