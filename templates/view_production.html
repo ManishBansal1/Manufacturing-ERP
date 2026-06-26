@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Production Voucher
+
+</h2>
+
+<hr>
+
+<table class="table table-bordered">
+
+<tr>
+
+<th width="220">
+
+Voucher No
+
+</th>
+
+<td>
+
+{{ production.id }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Production Date
+
+</th>
+
+<td>
+
+{{ production.production_date }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Finished Good
+
+</th>
+
+<td>
+
+{{ production.recipe.output_item.finished_good.fg_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Recipe
+
+</th>
+
+<td>
+
+{{ production.recipe.recipe_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Output Item
+
+</th>
+
+<td>
+
+{{ production.recipe.output_item.item_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Quantity
+
+</th>
+
+<td>
+
+{{ production.production_qty }}
+
+{{ production.recipe.output_item.unit }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Location
+
+</th>
+
+<td>
+
+{{ production.location.location_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Remarks
+
+</th>
+
+<td>
+
+{{ production.remarks }}
+
+</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h3>
+
+Transaction Details
+
+</h3>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>
+
+Type
+
+</th>
+
+<th>
+
+Item
+
+</th>
+
+<th>
+
+Qty
+
+</th>
+
+<th>
+
+Unit
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in details %}
+
+<tr>
+
+<td>
+
+{{ row.transaction_type }}
+
+</td>
+
+<td>
+
+{{ row.item.item_name }}
+
+</td>
+
+<td>
+
+{{ row.qty }}
+
+</td>
+
+<td>
+
+{{ row.item.unit }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<a
+class="btn btn-secondary"
+href="/production">
+
+Back
+
+</a>
+
+{% endblock %}

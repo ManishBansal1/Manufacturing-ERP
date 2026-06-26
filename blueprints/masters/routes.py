@@ -790,3 +790,46 @@ def add_production():
         location_list=location_list,
         fg_list=fg_list
     )
+
+@masters_bp.route(
+    "/production/view/<int:id>"
+)
+@login_required
+def view_production(id):
+
+    production = ProductionEntry.query.get_or_404(id)
+
+    details = ProductionEntryDetail.query.filter_by(
+        production_entry_id=id
+    ).all()
+
+    return render_template(
+        "view_production.html",
+        production=production,
+        details=details
+    )
+
+@masters_bp.route(
+    "/production/delete/<int:id>"
+)
+@login_required
+def delete_production(id):
+
+    production = ProductionEntry.query.get_or_404(id)
+
+    InventoryLedger.query.filter_by(
+        reference_type="PRODUCTION",
+        reference_id=id
+    ).delete()
+
+    ProductionEntryDetail.query.filter_by(
+        production_entry_id=id
+    ).delete()
+
+    db.session.delete(production)
+
+    db.session.commit()
+
+    return redirect(
+        url_for("masters.production")
+    )
