@@ -7,6 +7,8 @@ from flask import (
 
 from flask_login import login_required
 
+from sqlalchemy import func
+
 from datetime import date
 
 from models import db
@@ -832,4 +834,230 @@ def delete_production(id):
 
     return redirect(
         url_for("masters.production")
+    )
+
+@masters_bp.route("/inventory")
+@login_required
+def inventory():
+
+    fg_id = request.args.get(
+    "fg_id",
+    ""
+    )
+
+    item_type = request.args.get(
+    "item_type",
+    ""
+    )
+
+    item_search = request.args.get(
+        "item",
+        ""
+    )
+
+    location_id = request.args.get(
+        "location_id",
+        ""
+    )
+
+    query = (
+
+        db.session.query(
+
+            #ItemMaster.id,
+            ItemMaster.id.label("item_id"),
+
+            ItemMaster.item_code,
+
+            ItemMaster.item_name,
+
+            ItemMaster.unit,
+
+            LocationMaster.id.label(
+                "location_id"
+            ),
+
+            LocationMaster.location_name,
+
+            func.sum(
+                InventoryLedger.qty_in
+            ).label("received"),
+
+            func.sum(
+                InventoryLedger.qty_out
+            ).label("issued"),
+
+            (
+                func.sum(
+                    InventoryLedger.qty_in
+                )
+                -
+                func.sum(
+                    InventoryLedger.qty_out
+                )
+            ).label("stock")
+
+        )
+
+        .join(
+            InventoryLedger,
+            ItemMaster.id ==
+            InventoryLedger.item_id
+        )
+
+        .join(
+            LocationMaster,
+            InventoryLedger.location_id ==
+            LocationMaster.id
+        )
+
+    )
+
+    if item_search:
+
+        query = query.filter(
+
+            ItemMaster.item_name.ilike(
+                f"%{item_search}%"
+            )
+
+        )
+
+    if fg_id:
+
+        query = query.filter(
+        ItemMaster.finished_good_id == fg_id
+    )
+        
+    if item_type:
+
+        query = query.filter(
+        ItemMaster.item_type == item_type
+    )
+
+    if location_id:
+
+        query = query.filter(
+
+            InventoryLedger.location_id ==
+            location_id
+
+        )
+
+    stock = (
+
+        query.group_by(
+
+            ItemMaster.id,
+            ItemMaster.item_code,
+            ItemMaster.item_name,
+            ItemMaster.unit,
+            LocationMaster.id,
+            LocationMaster.location_name
+
+        )
+
+        .order_by(
+            ItemMaster.item_code
+        )
+
+        .all()
+
+    )
+
+    location_list = LocationMaster.query.order_by(
+
+        LocationMaster.location_name
+
+    ).all()
+
+    fg_list = FinishedGood.query.order_by(
+    FinishedGood.fg_name
+    ).all()
+
+    item_types = [
+
+    row[0]
+
+    for row in db.session.query(
+        ItemMaster.item_type
+    )
+    .distinct()
+    .order_by(
+        ItemMaster.item_type
+    )
+    .all()
+
+    ]
+
+    return render_template(
+
+    "inventory.html",
+
+    stock=stock,
+
+    item_search=item_search,
+
+    location_id=location_id,
+
+    location_list=location_list,
+
+    fg_list=fg_list,
+
+    fg_id=fg_id,
+
+    item_types=item_types,
+
+    item_type=item_type
+
+    )
+
+@masters_bp.route("/inventory/<int:item_id>")
+@login_required
+def inventory_detail(item_id):
+
+    item = ItemMaster.query.get_or_404(item_id)
+
+    ledger_rows = InventoryLedger.query.filter_by(
+        item_id=item_id
+    ).order_by(
+        InventoryLedger.trans_date,
+        InventoryLedger.id
+    ).all()
+
+    balance = 0
+
+    movement = []
+
+    for row in ledger_rows:
+
+        balance += row.qty_in
+        balance -= row.qty_out
+
+        movement.append({
+
+            "date": row.trans_date,
+
+            "location": row.location.location_name,
+
+            "reference": row.reference_type,
+
+            "remarks": row.remarks,
+
+            "qty_in": row.qty_in,
+
+            "qty_out": row.qty_out,
+
+            "balance": balance
+
+        })
+
+    return render_template(
+
+        "inventory_detail.html",
+
+        item=item,
+
+        movement=movement
+
     )
