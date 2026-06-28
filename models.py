@@ -756,3 +756,79 @@ class PurchaseReceiptDetail(db.Model):
     item = db.relationship(
         "ItemMaster"
     )
+
+class CustomerMaster(db.Model):
+
+    __tablename__ = "customer_master"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    customer_code = db.Column(
+        db.String(20),
+        unique=True,
+        nullable=True
+    )
+
+    customer_name = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    contact_person = db.Column(
+        db.String(100)
+    )
+
+    mobile = db.Column(
+        db.String(20)
+    )
+
+    email = db.Column(
+        db.String(100)
+    )
+
+    gst_no = db.Column(
+        db.String(30)
+    )
+
+    pan_no = db.Column(
+        db.String(20)
+    )
+
+    address = db.Column(
+        db.String(500)
+    )
+
+    city = db.Column(
+        db.String(100)
+    )
+
+    state = db.Column(
+        db.String(100)
+    )
+
+    country = db.Column(
+        db.String(100),
+        default="India"
+    )
+
+    pincode = db.Column(
+        db.String(20)
+    )
+
+    credit_days = db.Column(
+        db.Integer,
+        default=30
+    )
+
+    credit_limit = db.Column(
+        db.Float,
+        default=0
+    )
+
+    active = db.Column(
+        db.Boolean,
+        default=True
+    )

@@ -29,6 +29,7 @@ from models import StockAdjustment
 from models import VendorMaster
 from models import PurchaseReceiptHeader
 from models import PurchaseReceiptDetail
+from models import CustomerMaster
 
 
 masters_bp = Blueprint(
@@ -1772,6 +1773,195 @@ def delete_purchase_receipt(id):
 
     return redirect(
         url_for("masters.purchase_receipt")
+    )
+
+@masters_bp.route("/customers")
+@login_required
+def customers():
+
+    customer_list = CustomerMaster.query.order_by(
+        CustomerMaster.customer_name
+    ).all()
+
+    return render_template(
+        "customers.html",
+        customer_list=customer_list
+    )
+
+@masters_bp.route(
+    "/customers/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_customer():
+
+    if request.method == "POST":
+
+        last_customer = CustomerMaster.query.order_by(
+            CustomerMaster.id.desc()
+        ).first()
+
+        if last_customer:
+
+            next_no = last_customer.id + 1
+
+        else:
+
+            next_no = 1
+
+        customer = CustomerMaster(
+
+            customer_code=f"CUS-{next_no:06d}",
+
+            customer_name=request.form[
+                "customer_name"
+            ],
+
+            contact_person=request.form[
+                "contact_person"
+            ],
+
+            mobile=request.form[
+                "mobile"
+            ],
+
+            email=request.form[
+                "email"
+            ],
+
+            gst_no=request.form[
+                "gst_no"
+            ],
+
+            pan_no=request.form[
+                "pan_no"
+            ],
+
+            address=request.form[
+                "address"
+            ],
+
+            city=request.form[
+                "city"
+            ],
+
+            state=request.form[
+                "state"
+            ],
+
+            country=request.form[
+                "country"
+            ],
+
+            pincode=request.form[
+                "pincode"
+            ],
+
+            credit_days=int(
+                request.form["credit_days"]
+            ),
+
+            credit_limit=float(
+                request.form["credit_limit"]
+            ),
+
+            active="active" in request.form
+
+        )
+
+        db.session.add(customer)
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.customers"
+            )
+        )
+
+    return render_template(
+        "add_customer.html"
+    )
+
+@masters_bp.route(
+    "/customers/edit/<int:id>",
+    methods=["GET", "POST"]
+)
+@login_required
+def edit_customer(id):
+
+    customer = CustomerMaster.query.get_or_404(id)
+
+    if request.method == "POST":
+
+        customer.customer_name = request.form[
+            "customer_name"
+        ]
+
+        customer.contact_person = request.form[
+            "contact_person"
+        ]
+
+        customer.mobile = request.form[
+            "mobile"
+        ]
+
+        customer.email = request.form[
+            "email"
+        ]
+
+        customer.gst_no = request.form[
+            "gst_no"
+        ]
+
+        customer.pan_no = request.form[
+            "pan_no"
+        ]
+
+        customer.address = request.form[
+            "address"
+        ]
+
+        customer.city = request.form[
+            "city"
+        ]
+
+        customer.state = request.form[
+            "state"
+        ]
+
+        customer.country = request.form[
+            "country"
+        ]
+
+        customer.pincode = request.form[
+            "pincode"
+        ]
+
+        customer.credit_days = int(
+            request.form["credit_days"]
+        )
+
+        customer.credit_limit = float(
+            request.form["credit_limit"]
+        )
+
+        customer.active = "active" in request.form
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.customers"
+            )
+        )
+
+    return render_template(
+
+        "edit_customer.html",
+
+        customer=customer
+
     )
 
 

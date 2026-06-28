@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+Customer Master
+
+</h2>
+
+<a
+href="/customers/add"
+class="btn btn-primary mb-3">
+
+Add Customer
+
+</a>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>
+
+Code
+
+</th>
+
+<th>
+
+Customer Name
+
+</th>
+
+<th>
+
+Contact Person
+
+</th>
+
+<th>
+
+Mobile
+
+</th>
+
+<th>
+
+GST No
+
+</th>
+
+<th>
+
+Credit Days
+
+</th>
+
+<th>
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in customer_list %}
+
+<tr>
+
+<td>
+
+{{ row.customer_code }}
+
+</td>
+
+<td>
+
+{{ row.customer_name }}
+
+</td>
+
+<td>
+
+{{ row.contact_person }}
+
+</td>
+
+<td>
+
+{{ row.mobile }}
+
+</td>
+
+<td>
+
+{{ row.gst_no }}
+
+</td>
+
+<td>
+
+{{ row.credit_days }}
+
+</td>
+
+<td>
+
+<a
+href="/customers/edit/{{ row.id }}"
+class="btn btn-warning btn-sm">
+
+Edit
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}
