@@ -111,6 +111,15 @@ class ItemMaster(db.Model):
     nullable=True
     )
 
+    hsn_code = db.Column(
+    db.String(20)
+    )
+
+    gst_rate = db.Column(
+    db.Float,
+    default=18
+    )
+
     active = db.Column(
         db.Boolean,
         default=True
@@ -490,3 +499,245 @@ class OpeningStockDetail(db.Model):
         "ItemMaster"
     )
 
+class StockAdjustment(db.Model):
+
+    __tablename__ = "stock_adjustment"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    adjustment_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "location_master.id"
+        ),
+        nullable=False
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    location = db.relationship(
+        "LocationMaster"
+    )
+
+    details = db.relationship(
+
+        "StockAdjustmentDetail",
+
+        backref="stock_adjustment",
+
+        cascade="all, delete-orphan"
+
+    )
+
+class StockAdjustmentDetail(db.Model):
+
+    __tablename__ = "stock_adjustment_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    stock_adjustment_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "stock_adjustment.id"
+        ),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "item_master.id"
+        ),
+        nullable=False
+    )
+
+    adjustment_type = db.Column(
+        db.String(20),
+        nullable=False
+    )
+    # INCREASE
+    # DECREASE
+
+    qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+
+class VendorMaster(db.Model):
+
+    __tablename__ = "vendor_master"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    vendor_code = db.Column(
+        db.String(20),
+        unique=True,
+        nullable=True
+    )
+
+    vendor_name = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    contact_person = db.Column(
+        db.String(100)
+    )
+
+    mobile = db.Column(
+        db.String(20)
+    )
+
+    email = db.Column(
+        db.String(100)
+    )
+
+    gst_no = db.Column(
+        db.String(30)
+    )
+
+    pan_no = db.Column(
+        db.String(20)
+    )
+
+    address = db.Column(
+        db.String(500)
+    )
+
+    city = db.Column(
+        db.String(100)
+    )
+
+    state = db.Column(
+        db.String(100)
+    )
+
+    country = db.Column(
+        db.String(100),
+        default="India"
+    )
+
+    pincode = db.Column(
+        db.String(20)
+    )
+
+    active = db.Column(
+        db.Boolean,
+        default=True
+    )
+class PurchaseReceiptHeader(db.Model):
+
+    __tablename__ = "purchase_receipt_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    receipt_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    vendor_id = db.Column(
+        db.Integer,
+        db.ForeignKey("vendor_master.id"),
+        nullable=False
+    )
+
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey("location_master.id"),
+        nullable=False
+    )
+
+    invoice_no = db.Column(
+        db.String(100)
+    )
+
+    invoice_date = db.Column(
+        db.Date
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    vendor = db.relationship(
+        "VendorMaster"
+    )
+
+    location = db.relationship(
+        "LocationMaster"
+    )
+
+    details = db.relationship(
+        "PurchaseReceiptDetail",
+        backref="receipt",
+        cascade="all, delete-orphan"
+    )
+
+class PurchaseReceiptDetail(db.Model):
+
+    __tablename__ = "purchase_receipt_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    purchase_receipt_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "purchase_receipt_header.id"
+        ),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    basic_amount = db.Column(db.Float, default=0)
+
+    gst_rate = db.Column(db.Float, default=0)
+
+    gst_amount = db.Column(db.Float, default=0)
+
+    invoice_amount = db.Column(db.Float, default=0)
+
+    item = db.relationship(
+        "ItemMaster"
+    )

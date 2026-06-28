@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Add Purchase Receipt
+
+</h2>
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>
+
+Receipt Date
+
+</label>
+
+<input
+type="date"
+name="receipt_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Vendor
+
+</label>
+
+<select
+name="vendor_id"
+class="form-control"
+required>
+
+{% for vendor in vendor_list %}
+
+<option value="{{ vendor.id }}">
+
+{{ vendor.vendor_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Location
+
+</label>
+
+<select
+name="location_id"
+class="form-control"
+required>
+
+{% for location in location_list %}
+
+<option value="{{ location.id }}">
+
+{{ location.location_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Invoice No
+
+</label>
+
+<input
+type="text"
+name="invoice_no"
+class="form-control">
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>
+
+Invoice Date
+
+</label>
+
+<input
+type="date"
+name="invoice_date"
+class="form-control">
+
+</div>
+
+<div class="col-md-9">
+
+<label>
+
+Remarks
+
+</label>
+
+<input
+type="text"
+name="remarks"
+class="form-control">
+
+</div>
+
+</div>
+
+<br>
+
+<button
+    type="submit"
+    class="btn btn-success">
+
+    Save Purchase Receipt
+
+</button>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Vendor Master
+
+</h2>
+
+<a
+href="/vendors/add"
+class="btn btn-primary mb-3">
+
+Add Vendor
+
+</a>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>Vendor Code</th>
+
+<th>Vendor Name</th>
+
+<th>Contact Person</th>
+
+<th>Mobile</th>
+
+<th>GST No</th>
+
+<th>Status</th>
+
+<th>Edit</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in vendor_list %}
+
+<tr>
+
+<td>
+
+{{ row.vendor_code }}
+
+</td>
+
+<td>
+
+{{ row.vendor_name }}
+
+</td>
+
+<td>
+
+{{ row.contact_person }}
+
+</td>
+
+<td>
+
+{{ row.mobile }}
+
+</td>
+
+<td>
+
+{{ row.gst_no }}
+
+</td>
+
+<td>
+
+{% if row.active %}
+
+Active
+
+{% else %}
+
+Inactive
+
+{% endif %}
+
+</td>
+
+<td>
+
+<a
+href="/vendors/edit/{{ row.id }}"
+class="btn btn-warning btn-sm">
+
+Edit
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}

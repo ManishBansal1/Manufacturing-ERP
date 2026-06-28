@@ -24,6 +24,11 @@ from models import ProductionEntryDetail
 from models import InventoryLedger
 from models import OpeningStock
 from models import OpeningStockDetail
+from models import StockAdjustmentDetail
+from models import StockAdjustment
+from models import VendorMaster
+from models import PurchaseReceiptHeader
+from models import PurchaseReceiptDetail
 
 
 masters_bp = Blueprint(
@@ -148,6 +153,14 @@ def add_item():
             item_name=request.form["item_name"],
             item_type=request.form["item_type"],
             unit=request.form["unit"],
+            hsn_code=request.form[
+                    "hsn_code"
+                        ],
+
+            gst_rate=float(
+                    request.form[
+                    "gst_rate"
+                    ]),
             #production_stage=request.form["production_stage"],
             finished_good_id=fg_id if fg_id else None,
             production_stage_id=request.form.get(
@@ -201,6 +214,8 @@ def edit_item(id):
         item.item_name = request.form["item_name"]
         item.item_type = request.form["item_type"]
         item.unit = request.form["unit"]
+        item.hsn_code = request.form["hsn_code"]
+        item.gst_rate = float(request.form["gst_rate"])
         #item.production_stage = request.form["production_stage"]
         item.production_stage_id = request.form.get(
         "production_stage_id"
@@ -1204,3 +1219,367 @@ def view_opening_stock(id):
         opening=opening
 
     )
+
+@masters_bp.route("/stock-adjustment")
+@login_required
+def stock_adjustment():
+
+    adjustment_list = StockAdjustment.query.order_by(
+
+        StockAdjustment.adjustment_date.desc(),
+
+        StockAdjustment.id.desc()
+
+    ).all()
+
+    return render_template(
+
+        "stock_adjustment.html",
+
+        adjustment_list=adjustment_list
+
+    )
+
+@masters_bp.route(
+    "/stock-adjustment/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_stock_adjustment():
+
+    item_list = ItemMaster.query.order_by(
+        ItemMaster.item_name
+    ).all()
+
+    location_list = LocationMaster.query.order_by(
+        LocationMaster.location_name
+    ).all()
+
+    if request.method == "POST":
+
+        adjustment = StockAdjustment(
+
+            adjustment_date=date.fromisoformat(
+                request.form["adjustment_date"]
+            ),
+
+            location_id=request.form["location_id"],
+
+            remarks=request.form["remarks"]
+
+        )
+
+        db.session.add(adjustment)
+
+        db.session.flush()
+
+        item_ids = request.form.getlist("item_id")
+
+        types = request.form.getlist(
+            "adjustment_type"
+        )
+
+        qtys = request.form.getlist("qty")
+
+        for item_id, adj_type, qty in zip(
+
+            item_ids,
+
+            types,
+
+            qtys
+
+        ):
+
+            if not item_id or not qty:
+
+                continue
+
+            detail = StockAdjustmentDetail(
+
+                stock_adjustment_id=adjustment.id,
+
+                item_id=item_id,
+
+                adjustment_type=adj_type,
+
+                qty=float(qty)
+
+            )
+
+            db.session.add(detail)
+
+            ledger = InventoryLedger(
+
+                trans_date=adjustment.adjustment_date,
+
+                item_id=item_id,
+
+                location_id=adjustment.location_id,
+
+                qty_in=float(qty)
+                if adj_type == "INCREASE"
+                else 0,
+
+                qty_out=float(qty)
+                if adj_type == "DECREASE"
+                else 0,
+
+                reference_type="ADJUSTMENT",
+
+                reference_id=adjustment.id,
+
+                remarks="Stock Adjustment"
+
+            )
+
+            db.session.add(ledger)
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.stock_adjustment"
+            )
+        )
+
+    return render_template(
+
+        "add_stock_adjustment.html",
+
+        item_list=item_list,
+
+        location_list=location_list
+
+    )
+
+@masters_bp.route(
+    "/stock-adjustment/view/<int:id>"
+)
+@login_required
+def view_stock_adjustment(id):
+
+    adjustment = StockAdjustment.query.get_or_404(id)
+
+    return render_template(
+
+        "view_stock_adjustment.html",
+
+        adjustment=adjustment
+
+    )
+
+@masters_bp.route("/vendors")
+@login_required
+def vendors():
+
+    vendor_list = VendorMaster.query.order_by(
+        VendorMaster.vendor_name
+    ).all()
+
+    return render_template(
+        "vendors.html",
+        vendor_list=vendor_list
+    )
+
+
+@masters_bp.route(
+    "/vendors/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_vendor():
+
+    if request.method == "POST":
+
+        vendor = VendorMaster(
+
+
+            vendor_name=request.form[
+                "vendor_name"
+            ],
+
+            contact_person=request.form[
+                "contact_person"
+            ],
+
+            mobile=request.form[
+                "mobile"
+            ],
+
+            email=request.form[
+                "email"
+            ],
+
+            gst_no=request.form[
+                "gst_no"
+            ],
+
+            pan_no=request.form[
+                "pan_no"
+            ],
+
+            address=request.form[
+                "address"
+            ],
+
+            city=request.form[
+                "city"
+            ],
+
+            state=request.form[
+                "state"
+            ],
+
+            country=request.form[
+                "country"
+            ],
+
+            pincode=request.form[
+                "pincode"
+            ],
+
+            active="active" in request.form
+
+        )
+
+        db.session.add(vendor)
+        db.session.flush()
+        vendor.vendor_code = f"V{vendor.id:05d}"
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.vendors"
+            )
+        )
+
+    return render_template(
+        "add_vendor.html"
+    )
+
+
+@masters_bp.route(
+    "/vendors/edit/<int:id>",
+    methods=["GET", "POST"]
+)
+@login_required
+def edit_vendor(id):
+
+    vendor = VendorMaster.query.get_or_404(id)
+
+    if request.method == "POST":
+
+        vendor.vendor_name = request.form[
+            "vendor_name"
+        ]
+
+        vendor.contact_person = request.form[
+            "contact_person"
+        ]
+
+        vendor.mobile = request.form[
+            "mobile"
+        ]
+
+        vendor.email = request.form[
+            "email"
+        ]
+
+        vendor.gst_no = request.form[
+            "gst_no"
+        ]
+
+        vendor.pan_no = request.form[
+            "pan_no"
+        ]
+
+        vendor.address = request.form[
+            "address"
+        ]
+
+        vendor.city = request.form[
+            "city"
+        ]
+
+        vendor.state = request.form[
+            "state"
+        ]
+
+        vendor.country = request.form[
+            "country"
+        ]
+
+        vendor.pincode = request.form[
+            "pincode"
+        ]
+
+        vendor.active = "active" in request.form
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.vendors"
+            )
+        )
+
+    return render_template(
+        "edit_vendor.html",
+        vendor=vendor
+    )
+
+@masters_bp.route("/purchase-receipt")
+@login_required
+def purchase_receipt():
+
+    receipt_list = PurchaseReceiptHeader.query.order_by(
+        PurchaseReceiptHeader.receipt_date.desc(),
+        PurchaseReceiptHeader.id.desc()
+    ).all()
+
+    return render_template(
+        "purchase_receipt.html",
+        receipt_list=receipt_list
+    )
+
+@masters_bp.route(
+    "/purchase-receipt/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_purchase_receipt():
+
+    vendor_list = VendorMaster.query.order_by(
+        VendorMaster.vendor_name
+    ).all()
+
+    location_list = LocationMaster.query.order_by(
+        LocationMaster.location_name
+    ).all()
+
+    item_list = ItemMaster.query.order_by(
+        ItemMaster.item_name
+    ).all()
+
+    if request.method == "POST":
+
+        # Save logic will be added next
+
+        pass
+
+    return render_template(
+
+        "add_purchase_receipt.html",
+
+        vendor_list=vendor_list,
+
+        location_list=location_list,
+
+        item_list=item_list
+
+    )
+
+
+

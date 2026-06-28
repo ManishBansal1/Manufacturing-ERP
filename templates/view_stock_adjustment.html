@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Stock Adjustment Voucher
+
+</h2>
+
+<table class="table table-bordered">
+
+<tr>
+
+<th>
+
+Voucher No
+
+</th>
+
+<td>
+
+SA-{{ "%06d"|format(adjustment.id) }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th width="200">
+
+Adjustment Date
+
+</th>
+
+<td>
+
+{{ adjustment.adjustment_date }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Location
+
+</th>
+
+<td>
+
+{{ adjustment.location.location_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Remarks
+
+</th>
+
+<td>
+
+{{ adjustment.remarks }}
+
+</td>
+
+</tr>
+
+</table>
+
+<h4>
+
+Items
+
+</h4>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>
+
+Item
+
+</th>
+
+<th>
+
+Adjustment Type
+
+</th>
+
+<th>
+
+Qty
+
+</th>
+
+<th>
+
+Unit
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in adjustment.details %}
+
+<tr>
+
+<td>
+
+{{ row.item.item_name }}
+
+</td>
+
+<td>
+
+{{ row.adjustment_type }}
+
+</td>
+
+<td>
+
+{{ "%.0f"|format(row.qty) }}
+
+</td>
+
+<td>
+
+{{ row.item.unit }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<a
+href="/stock-adjustment"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Purchase Receipt
+
+</h2>
+
+<a
+href="/purchase-receipt/add"
+class="btn btn-primary mb-3">
+
+Add Purchase Receipt
+
+</a>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>
+
+Receipt No
+
+</th>
+
+<th>
+
+Receipt Date
+
+</th>
+
+<th>
+
+Vendor
+
+</th>
+
+<th>
+
+Location
+
+</th>
+
+<th>
+
+Invoice No
+
+</th>
+
+<th>
+
+View
+
+</th>
+
+<th>
+
+Delete
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in receipt_list %}
+
+<tr>
+
+<td>
+
+GRN-{{ "%06d"|format(row.id) }}
+
+</td>
+
+<td>
+
+{{ row.receipt_date }}
+
+</td>
+
+<td>
+
+{{ row.vendor.vendor_name }}
+
+</td>
+
+<td>
+
+{{ row.location.location_name }}
+
+</td>
+
+<td>
+
+{{ row.invoice_no }}
+
+</td>
+
+<td>
+
+<a
+href="/purchase-receipt/view/{{ row.id }}"
+class="btn btn-info btn-sm">
+
+View
+
+</a>
+
+</td>
+
+<td>
+
+<button
+class="btn btn-danger btn-sm">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}

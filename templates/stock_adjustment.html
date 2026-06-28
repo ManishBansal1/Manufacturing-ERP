@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+    Stock Adjustment
+
+</h2>
+
+<a
+    href="/stock-adjustment/add"
+    class="btn btn-primary mb-3">
+
+    Add Stock Adjustment
+
+</a>
+
+<table class="table table-bordered">
+
+    <thead>
+
+        <tr>
+
+            <th>Date</th>
+
+            <th>
+
+                Voucher No
+
+            </th>
+
+            <th>Location</th>
+
+            <th>Remarks</th>
+
+            <th>View</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for row in adjustment_list %}
+
+        <tr>
+
+            <td>
+
+                {{ row.adjustment_date }}
+
+            </td>
+
+            <td>
+
+                SA-{{ "%06d"|format(row.id) }}
+
+            </td>
+
+            <td>
+
+                {{ row.location.location_name }}
+
+            </td>
+
+            <td>
+
+                {{ row.remarks }}
+
+            </td>
+
+            <td>
+
+                <a
+                    href="/stock-adjustment/view/{{ row.id }}"
+                    class="btn btn-info btn-sm">
+
+                    View
+
+                </a>
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}
