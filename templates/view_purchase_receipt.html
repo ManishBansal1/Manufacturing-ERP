@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Purchase Receipt
+
+</h2>
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<strong>GRN No</strong>
+
+<br>
+
+{{ receipt.grn_no }}
+
+</div>
+
+<div class="col-md-3">
+
+<strong>Date</strong>
+
+<br>
+
+{{ receipt.receipt_date }}
+
+</div>
+
+<div class="col-md-3">
+
+<strong>Vendor</strong>
+
+<br>
+
+{{ receipt.vendor.vendor_name }}
+
+</div>
+
+<div class="col-md-3">
+
+<strong>Location</strong>
+
+<br>
+
+{{ receipt.location.location_name }}
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<strong>Vendor Invoice No</strong>
+
+<br>
+
+{{ receipt.invoice_no }}
+
+</div>
+
+<div class="col-md-3">
+
+<strong>Invoice Date</strong>
+
+<br>
+
+{{ receipt.invoice_date }}
+
+</div>
+
+<div class="col-md-6">
+
+<strong>Remarks</strong>
+
+<br>
+
+{{ receipt.remarks }}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Qty</th>
+
+<th>Rate</th>
+
+<th>Basic</th>
+
+<th>GST %</th>
+
+<th>GST</th>
+
+<th>Invoice</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in receipt.details %}
+
+<tr>
+
+<td>
+
+{{ row.item.item_name }}
+
+</td>
+
+<td>
+
+{{ "%.0f"|format(row.qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.rate) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.basic_amount) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.gst_rate) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.gst_amount) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.invoice_amount) }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+<tfoot>
+
+<tr>
+
+<th colspan="3">
+
+Totals
+
+</th>
+
+<th>
+
+{{ "%.2f"|format(receipt.basic_amount) }}
+
+</th>
+
+<th></th>
+
+<th>
+
+{{ "%.2f"|format(receipt.gst_amount) }}
+
+</th>
+
+<th>
+
+{{ "%.2f"|format(receipt.invoice_amount) }}
+
+</th>
+
+</tr>
+
+</tfoot>
+
+</table>
+
+<a
+
+href="/purchase-receipt"
+
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+{% endblock %}

@@ -1565,13 +1565,160 @@ def add_purchase_receipt():
 
     if request.method == "POST":
 
-        # Save logic will be added next
+        receipt = PurchaseReceiptHeader(
 
-        pass
+            receipt_date=date.fromisoformat(
+                request.form["receipt_date"]
+            ),
+
+            vendor_id=request.form[
+                "vendor_id"
+            ],
+
+            location_id=request.form[
+                "location_id"
+            ],
+
+            invoice_no=request.form[
+                "invoice_no"
+            ],
+
+            invoice_date=date.fromisoformat(
+                request.form["invoice_date"]
+            ) if request.form["invoice_date"] else None,
+
+            remarks=request.form[
+                "remarks"
+            ],
+
+            basic_amount=float(
+                request.form["total_basic_amount"]
+            ),
+
+            gst_amount=float(
+                request.form["total_gst_amount"]
+            ),
+
+            invoice_amount=float(
+                request.form["total_invoice_amount"]
+            )
+
+        )
+
+        db.session.add(receipt)
+
+        db.session.flush()
+
+        item_ids = request.form.getlist(
+        "item_id"
+        )
+
+        #print(item_ids)
+
+        #print(request.form)
+
+        qtys = request.form.getlist(
+            "qty"
+        )
+
+        rates = request.form.getlist(
+            "rate"
+        )
+
+        gst_rates = request.form.getlist(
+            "gst_rate"
+        )
+
+        basic_amounts = request.form.getlist(
+            "basic_amount"
+        )
+
+        gst_amounts = request.form.getlist(
+            "gst_amount"
+        )
+
+        invoice_amounts = request.form.getlist(
+            "invoice_amount"
+        )
+
+        for item_id, qty, rate, gst_rate, basic, gst, invoice in zip(
+
+        item_ids,
+
+        qtys,
+
+        rates,
+
+        gst_rates,
+
+        basic_amounts,
+
+        gst_amounts,
+
+        invoice_amounts
+
+        ):
+
+            if not item_id:
+
+                continue
+
+            detail = PurchaseReceiptDetail(
+
+                purchase_receipt_id=receipt.id,
+
+                item_id=item_id,
+
+                qty=float(qty),
+
+                rate=float(rate),
+
+                basic_amount=float(basic),
+
+                gst_rate=float(gst_rate),
+
+                gst_amount=float(gst),
+
+                invoice_amount=float(invoice)
+
+            )
+
+
+            db.session.add(detail)
+
+            ledger = InventoryLedger(
+
+                trans_date=receipt.receipt_date,
+
+                item_id=item_id,
+
+                location_id=receipt.location_id,
+
+                qty_in=float(qty),
+
+                qty_out=0,
+
+                reference_type="PURCHASE",
+
+                reference_id=receipt.id,
+
+                remarks="Purchase Receipt"
+
+            )
+
+            db.session.add(ledger)
+
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "masters.purchase_receipt"
+            )
+        )
 
     return render_template(
 
-        "add_purchase_receipt.html",
+         "add_purchase_receipt.html",
 
         vendor_list=vendor_list,
 
@@ -1581,5 +1728,50 @@ def add_purchase_receipt():
 
     )
 
+@masters_bp.route(
+    "/purchase-receipt/view/<int:id>"
+)
+@login_required
+def view_purchase_receipt(id):
+
+    receipt = PurchaseReceiptHeader.query.get_or_404(id)
+
+    return render_template(
+
+        "view_purchase_receipt.html",
+
+        receipt=receipt
+
+    )
+
+@masters_bp.route(
+    "/purchase-receipt/delete/<int:id>"
+)
+@login_required
+def delete_purchase_receipt(id):
+
+    receipt = PurchaseReceiptHeader.query.get_or_404(id)
+
+    InventoryLedger.query.filter_by(
+
+        reference_type="PURCHASE",
+
+        reference_id=receipt.id
+
+    ).delete()
+
+    PurchaseReceiptDetail.query.filter_by(
+
+        purchase_receipt_id=receipt.id
+
+    ).delete()
+
+    db.session.delete(receipt)
+
+    db.session.commit()
+
+    return redirect(
+        url_for("masters.purchase_receipt")
+    )
 
 

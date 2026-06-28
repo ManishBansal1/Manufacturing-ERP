@@ -691,6 +691,21 @@ class PurchaseReceiptHeader(db.Model):
         "LocationMaster"
     )
 
+    basic_amount = db.Column(
+    db.Float,
+    default=0
+    )
+
+    gst_amount = db.Column(
+    db.Float,
+    default=0
+    )
+
+    invoice_amount = db.Column(
+    db.Float,
+    default=0
+    )
+
     details = db.relationship(
         "PurchaseReceiptDetail",
         backref="receipt",

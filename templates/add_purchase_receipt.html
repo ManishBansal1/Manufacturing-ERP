@@ -8,7 +8,7 @@ Add Purchase Receipt
 
 </h2>
 
-<form method="POST">
+<form method="POST" id="receiptForm">
 
 <div class="row">
 
@@ -37,9 +37,12 @@ Vendor
 </label>
 
 <select
+id="vendor"
 name="vendor_id"
 class="form-control"
 required>
+
+<option value="">Select Vendor</option>
 
 {% for vendor in vendor_list %}
 
@@ -137,14 +140,552 @@ class="form-control">
 
 <br>
 
-<button
-    type="submit"
-    class="btn btn-success">
+<h4>
 
-    Save Purchase Receipt
+Items
+
+</h4>
+
+<table
+class="table table-bordered"
+id="itemTable">
+
+<thead>
+
+<tr>
+
+<th width="24%">
+
+Item
+
+</th>
+
+<th>
+
+Unit
+
+</th>
+
+<th>
+
+HSN
+
+</th>
+
+<th>
+
+GST %
+
+</th>
+
+<th>
+
+Qty
+
+</th>
+
+<th>
+
+Rate
+
+</th>
+
+<th>
+
+Basic
+
+</th>
+
+<th>
+
+GST
+
+</th>
+
+<th>
+
+Invoice
+
+</th>
+
+<th>
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tableBody">
+
+</tbody>
+
+</table>
+
+<button
+type="button"
+class="btn btn-primary"
+onclick="addRow()">
+
+Add Row
+
+</button>
+
+<br>
+
+<div class="row justify-content-end">
+
+<div class="col-md-4">
+
+<table class="table">
+
+<tr>
+
+<th>
+
+Basic Amount
+
+</th>
+
+<td id="basicTotal">
+
+0.00
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+GST Amount
+
+</th>
+
+<td id="gstTotal">
+
+0.00
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Invoice Total
+
+</th>
+
+<td id="invoiceTotal">
+
+0.00
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<input
+type="hidden"
+id="total_basic_amount"
+name="total_basic_amount">
+
+<input
+type="hidden"
+id="total_gst_amount"
+name="total_gst_amount">
+
+<input
+type="hidden"
+id="total_invoice_amount"
+name="total_invoice_amount">
+
+<button
+type="submit"
+class="btn btn-success">
+
+Save Purchase Receipt
 
 </button>
 
 </form>
+
+<script>
+
+let rowNo = 0;
+
+function addRow(){
+
+rowNo++;
+
+let html = `
+
+<tr>
+
+<td>
+
+<select
+name="item_id"
+class="form-control item">
+
+<option value="">
+
+Select Item
+
+</option>
+
+{% for item in item_list %}
+
+<option
+
+value="{{ item.id }}"
+
+data-unit="{{ item.unit }}"
+
+data-hsn="{{ item.hsn_code }}"
+
+data-gst="{{ item.gst_rate }}">
+
+{{ item.item_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</td>
+
+<td>
+
+<input
+class="form-control unit"
+readonly>
+
+</td>
+
+<td>
+
+<input
+class="form-control hsn"
+readonly>
+
+</td>
+
+<td>
+
+<input
+name="gst_rate"
+class="form-control gstRate"
+readonly>
+
+</td>
+
+<td>
+
+<input
+type="number"
+step="0.001"
+name="qty"
+class="form-control qty">
+
+</td>
+
+<td>
+
+<input
+type="number"
+step="0.01"
+name="rate"
+class="form-control rate">
+
+</td>
+
+<td>
+
+<input
+name="basic_amount"
+class="form-control basic"
+readonly>
+
+</td>
+
+<td>
+
+<input
+name="gst_amount"
+class="form-control gst"
+readonly>
+
+</td>
+
+<td>
+
+<input
+name="invoice_amount"
+class="form-control invoice"
+readonly>
+
+</td>
+
+<td>
+
+<button
+
+type="button"
+
+class="btn btn-danger"
+
+onclick="removeRow(this)">
+
+X
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+document
+
+.getElementById("tableBody")
+
+.insertAdjacentHTML(
+
+'beforeend',
+
+html
+
+);
+
+initializeRow();
+
+}
+
+function initializeRow(){
+
+let row = $("#tableBody tr:last");
+
+row.find(".item").select2({
+
+width:"100%"
+
+});
+
+row.find(".item").on(
+
+"change",
+
+function(){
+
+let selected=$(this).find(":selected");
+
+row.find(".unit").val(
+
+selected.data("unit")
+
+);
+
+row.find(".hsn").val(
+
+selected.data("hsn")
+
+);
+
+row.find(".gstRate").val(
+
+selected.data("gst")
+
+);
+
+calculateRow(row);
+
+}
+
+);
+
+row.find(".qty,.rate").on(
+
+"input",
+
+function(){
+
+calculateRow(row);
+
+}
+
+);
+
+}
+
+function calculateRow(row){
+
+let qty=
+
+parseFloat(
+
+row.find(".qty").val()
+
+)||0;
+
+let rate=
+
+parseFloat(
+
+row.find(".rate").val()
+
+)||0;
+
+let gstRate=
+
+parseFloat(
+
+row.find(".gstRate").val()
+
+)||0;
+
+let basic=
+
+qty*rate;
+
+let gst=
+
+basic*gstRate/100;
+
+let invoice=
+
+basic+gst;
+
+row.find(".basic").val(
+
+basic.toFixed(2)
+
+);
+
+row.find(".gst").val(
+
+gst.toFixed(2)
+
+);
+
+row.find(".invoice").val(
+
+invoice.toFixed(2)
+
+);
+
+calculateTotals();
+
+}
+
+function calculateTotals(){
+
+let basic=0;
+
+let gst=0;
+
+let invoice=0;
+
+$(".basic").each(function(){
+
+basic+=parseFloat(
+
+$(this).val()
+
+)||0;
+
+});
+
+$(".gst").each(function(){
+
+gst+=parseFloat(
+
+$(this).val()
+
+)||0;
+
+});
+
+$(".invoice").each(function(){
+
+invoice+=parseFloat(
+
+$(this).val()
+
+)||0;
+
+});
+
+$("#basicTotal").text(
+
+basic.toFixed(2)
+
+);
+
+$("#gstTotal").text(
+
+gst.toFixed(2)
+
+);
+
+$("#invoiceTotal").text(
+
+invoice.toFixed(2)
+
+);
+
+document.getElementById(
+    "total_basic_amount"
+).value = basic.toFixed(2);
+
+document.getElementById(
+    "total_gst_amount"
+).value = gst.toFixed(2);
+
+document.getElementById(
+    "total_invoice_amount"
+).value = invoice.toFixed(2);
+
+}
+
+function removeRow(btn){
+
+$(btn)
+
+.closest("tr")
+
+.remove();
+
+calculateTotals();
+
+}
+
+$(document).ready(function(){
+
+    $("#vendor").select2({
+
+        placeholder:"Select Vendor"
+
+    });
+
+});
+
+window.onload=function(){
+
+    addRow();
+
+}
+
+</script>
 
 {% endblock %}
