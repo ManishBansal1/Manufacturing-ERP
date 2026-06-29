@@ -832,3 +832,161 @@ class CustomerMaster(db.Model):
         db.Boolean,
         default=True
     )
+
+class CustomerPOHeader(db.Model):
+
+    __tablename__ = "customer_po_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_master.id"),
+        nullable=False
+    )
+
+    customer_po_no = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    customer_po_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    order_received_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    payment_terms = db.Column(
+        db.String(200)
+    )
+
+    freight_terms = db.Column(
+        db.String(200)
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="OPEN"
+    )
+
+    customer = db.relationship(
+        "CustomerMaster"
+    )
+
+    details = db.relationship(
+
+        "CustomerPODetail",
+
+        backref="customer_po",
+
+        cascade="all, delete-orphan"
+
+    )
+
+class CustomerPODetail(db.Model):
+
+    __tablename__ = "customer_po_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    customer_po_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "customer_po_header.id"
+        ),
+        nullable=False
+    )
+
+    line_no = db.Column(
+        db.String(30)
+    )
+
+    finished_good_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "finished_goods.id"
+        ),
+        nullable=False
+    )
+
+    qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    freight = db.Column(
+        db.Float,
+        default=0
+    )
+
+    gst_rate = db.Column(
+        db.Float,
+        default=18
+    )
+
+    basic_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    gst_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    total_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    delivery_date = db.Column(
+        db.Date
+    )
+
+    produced_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    fg_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    dispatched_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    pending_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="OPEN"
+    )
+
+    finished_good = db.relationship(
+        "FinishedGood"
+    )

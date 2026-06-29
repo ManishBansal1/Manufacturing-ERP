@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+    Customer Purchase Orders
+
+</h2>
+
+<a
+    href="/customer-po/add"
+    class="btn btn-primary mb-3">
+
+    Add Customer PO
+
+</a>
+
+<table class="table table-bordered table-striped">
+
+    <thead>
+
+        <tr>
+
+            <th>
+
+                Customer PO No
+
+            </th>
+
+            <th>
+
+                Customer
+
+            </th>
+
+            <th>
+
+                PO Date
+
+            </th>
+
+            <th>
+
+                Received Date
+
+            </th>
+
+            <th>
+
+                Status
+
+            </th>
+
+            <th>
+
+                View
+
+            </th>
+
+            <th>
+
+                Edit
+
+            </th>
+
+        </tr>
+
+    </thead>
+
+<tbody>
+
+    {% for row in po_list %}
+
+        <tr>
+
+            <td>
+
+                {{ row.customer_po_no }}
+
+            </td>
+
+            <td>
+
+                {{ row.customer.customer_name }}
+
+            </td>
+
+            <td>
+
+                {{ row.customer_po_date }}
+
+            </td>
+
+            <td>
+
+                {{ row.order_received_date }}
+
+            </td>
+
+            <td>
+
+                {{ row.status }}
+
+            </td>
+
+            <td>
+
+                <a
+                    href="/customer-po/view/{{ row.id }}"
+                    class="btn btn-info btn-sm">
+
+                    View
+
+                </a>
+
+            </td>
+
+            <td>
+
+                <a
+                    href="/customer-po/edit/{{ row.id }}"
+                    class="btn btn-warning btn-sm">
+
+                    Edit
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

@@ -30,6 +30,9 @@ from models import VendorMaster
 from models import PurchaseReceiptHeader
 from models import PurchaseReceiptDetail
 from models import CustomerMaster
+from models import CustomerPOHeader
+from models import CustomerPODetail
+
 
 
 masters_bp = Blueprint(
@@ -1961,6 +1964,50 @@ def edit_customer(id):
         "edit_customer.html",
 
         customer=customer
+
+    )
+
+@masters_bp.route("/customer-po")
+@login_required
+def customer_po():
+
+    po_list = CustomerPOHeader.query.order_by(
+        CustomerPOHeader.order_received_date.desc(),
+        CustomerPOHeader.id.desc()
+    ).all()
+
+    return render_template(
+        "customer_po.html",
+        po_list=po_list
+    )
+
+@masters_bp.route(
+    "/customer-po/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_customer_po():
+
+    customer_list = CustomerMaster.query.order_by(
+        CustomerMaster.customer_name
+    ).all()
+
+    fg_list = FinishedGood.query.order_by(
+        FinishedGood.fg_code
+    ).all()
+
+    if request.method == "POST":
+
+        # Saving logic will be added next
+        pass
+
+    return render_template(
+
+        "add_customer_po.html",
+
+        customer_list=customer_list,
+
+        fg_list=fg_list
 
     )
 
