@@ -120,13 +120,54 @@
 
             <td>
 
-                <a
-                    href="/customer-po/edit/{{ row.id }}"
-                    class="btn btn-warning btn-sm">
+                {% if row.status=="OPEN" %}
 
-                    Edit
+                    <a
+                        href="/customer-po/edit/{{ row.id }}"
+                        class="btn btn-warning btn-sm">
 
-                </a>
+                        Edit
+
+                    </a>
+
+                    {% else %}
+
+                    <button
+                        class="btn btn-secondary btn-sm"
+                        disabled>
+
+                        Locked
+
+                    </button>
+
+                    {% endif %}
+
+            </td>
+
+            <td>
+
+                {% if row.status=="OPEN" %}
+
+                    <a
+                        href="/customer-po/cancel/{{ row.id }}"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Cancel this Customer PO?');">
+
+                        Cancel
+
+                    </a>
+
+                    {% else %}
+
+                    <button
+                        class="btn btn-secondary btn-sm"
+                        disabled>
+
+                        Cancelled
+
+                    </button>
+
+                    {% endif %}
 
             </td>
 

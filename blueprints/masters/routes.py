@@ -2223,6 +2223,18 @@ def edit_customer_po(id):
 
     po = CustomerPOHeader.query.get_or_404(id)
 
+    if po.status == "CANCELLED":
+
+        return redirect(
+
+        url_for(
+
+            "masters.customer_po"
+
+        )
+
+    )
+
     customer_list = CustomerMaster.query.order_by(
         CustomerMaster.customer_name
     ).all()
@@ -2413,4 +2425,30 @@ def edit_customer_po(id):
 
     )
 
+
+@masters_bp.route(
+    "/customer-po/cancel/<int:id>"
+)
+@login_required
+def cancel_customer_po(id):
+
+    po = CustomerPOHeader.query.get_or_404(id)
+
+    po.status = "CANCELLED"
+
+    for row in po.details:
+
+        row.status = "CANCELLED"
+
+    db.session.commit()
+
+    return redirect(
+
+        url_for(
+
+            "masters.customer_po"
+
+        )
+
+    )
 
