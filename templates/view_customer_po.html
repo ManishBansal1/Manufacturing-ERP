@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+<h2>
+
+Customer Purchase Order
+
+</h2>
+
+<div class="card mb-3">
+
+<div class="card-header">
+
+Header Details
+
+</div>
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<b>Customer</b><br>
+
+{{ po.customer.customer_name }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Customer PO No</b><br>
+
+{{ po.customer_po_no }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Customer PO Date</b><br>
+
+{{ po.customer_po_date }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Received Date</b><br>
+
+{{ po.order_received_date }}
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<b>Payment Terms</b><br>
+
+{{ po.payment_terms }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Freight Terms</b><br>
+
+{{ po.freight_terms }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Status</b><br>
+
+{{ po.status }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Remarks</b><br>
+
+{{ po.remarks }}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-header">
+
+Customer PO Line Items
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>
+
+Line
+
+</th>
+
+<th>
+
+Finished Good
+
+</th>
+
+<th>
+
+Qty
+
+</th>
+
+<th>
+
+Rate
+
+</th>
+
+<th>
+
+Freight
+
+</th>
+
+<th>
+
+GST %
+
+</th>
+
+<th>
+
+Basic
+
+</th>
+
+<th>
+
+GST
+
+</th>
+
+<th>
+
+Total
+
+</th>
+
+<th>
+
+Delivery Date
+
+</th>
+
+<th>
+
+Produced
+
+</th>
+
+<th>
+
+FG Qty
+
+</th>
+
+<th>
+
+Dispatched
+
+</th>
+
+<th>
+
+Pending
+
+</th>
+
+<th>
+
+Status
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in po.details %}
+
+<tr>
+
+<td>
+
+{{ row.line_no }}
+
+</td>
+
+<td>
+
+{{ row.finished_good.fg_code }}
+
+-
+
+{{ row.finished_good.fg_name }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.rate) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.freight) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.gst_rate) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.basic_amount) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.gst_amount) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.total_amount) }}
+
+</td>
+
+<td>
+
+{{ row.delivery_date }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.produced_qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.fg_qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.dispatched_qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.pending_qty) }}
+
+</td>
+
+<td>
+
+{{ row.status }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<br>
+
+<a
+
+href="/customer-po"
+
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+{% endblock %}

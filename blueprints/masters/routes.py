@@ -1998,9 +1998,195 @@ def add_customer_po():
 
     if request.method == "POST":
 
-        # Saving logic will be added next
-        pass
+            po = CustomerPOHeader(
 
+            customer_id=request.form[
+                "customer_id"
+            ],
+
+            customer_po_no=request.form[
+                "customer_po_no"
+            ],
+
+            customer_po_date=date.fromisoformat(
+
+                request.form[
+                    "customer_po_date"
+                ]
+
+            ),
+
+            order_received_date=date.fromisoformat(
+
+                request.form[
+                    "order_received_date"
+                ]
+
+            ),
+
+            payment_terms=request.form[
+                "payment_terms"
+            ],
+
+            freight_terms=request.form[
+                "freight_terms"
+            ],
+
+            remarks=request.form[
+                "remarks"
+            ],
+
+            status="OPEN"
+
+            )
+
+            db.session.add(po)
+
+            db.session.flush()
+
+            line_nos = request.form.getlist(
+            "line_no"
+            )
+
+            fg_ids = request.form.getlist(
+                "finished_good_id"
+            )
+
+            qtys = request.form.getlist(
+                "qty"
+            )
+
+            rates = request.form.getlist(
+                "rate"
+            )
+
+            freights = request.form.getlist(
+                "freight"
+            )
+
+            gst_rates = request.form.getlist(
+                "gst_rate"
+            )
+
+            basics = request.form.getlist(
+                "basic_amount"
+            )
+
+            gst_amounts = request.form.getlist(
+                "gst_amount"
+            )
+
+            totals = request.form.getlist(
+                "total_amount"
+            )
+
+            delivery_dates = request.form.getlist(
+                "delivery_date"
+            )
+
+            for (
+
+            line_no,
+
+            fg_id,
+
+            qty,
+
+            rate,
+
+            freight,
+
+            gst_rate,
+
+            basic,
+
+            gst,
+
+            total,
+
+            delivery_date
+
+            ) in zip(
+
+            line_nos,
+
+            fg_ids,
+
+            qtys,
+
+            rates,
+
+            freights,
+
+            gst_rates,
+
+            basics,
+
+            gst_amounts,
+
+            totals,
+
+            delivery_dates
+
+            ):
+
+                if not fg_id:
+
+                    continue
+
+                detail = CustomerPODetail(
+
+                    customer_po_header_id=po.id,
+
+                    line_no=line_no,
+
+                    finished_good_id=int(fg_id),
+
+                    qty=float(qty),
+
+                    rate=float(rate),
+
+                    freight=float(freight),
+
+                    gst_rate=float(gst_rate),
+
+                    basic_amount=float(basic),
+
+                    gst_amount=float(gst),
+
+                    total_amount=float(total),
+
+                    delivery_date=date.fromisoformat(
+                        delivery_date
+                    ),
+
+                    produced_qty=0,
+
+                    fg_qty=0,
+
+                    dispatched_qty=0,
+
+                    pending_qty=float(qty),
+
+                    status="OPEN"
+
+                )
+
+                db.session.add(detail)
+
+            db.session.commit()
+
+            return redirect(
+
+                url_for(
+
+                        "masters.customer_po"
+
+                    )
+
+                )
+    
+    
     return render_template(
 
         "add_customer_po.html",
@@ -2008,6 +2194,222 @@ def add_customer_po():
         customer_list=customer_list,
 
         fg_list=fg_list
+
+    )
+
+
+@masters_bp.route(
+    "/customer-po/view/<int:id>"
+)
+@login_required
+def view_customer_po(id):
+
+    po = CustomerPOHeader.query.get_or_404(id)
+
+    return render_template(
+
+        "view_customer_po.html",
+
+        po=po
+
+    )
+
+@masters_bp.route(
+    "/customer-po/edit/<int:id>",
+    methods=["GET", "POST"]
+)
+@login_required
+def edit_customer_po(id):
+
+    po = CustomerPOHeader.query.get_or_404(id)
+
+    customer_list = CustomerMaster.query.order_by(
+        CustomerMaster.customer_name
+    ).all()
+
+    fg_list = FinishedGood.query.order_by(
+        FinishedGood.fg_code
+    ).all()
+
+    if request.method == "POST":
+
+        po.customer_id=request.form["customer_id"]
+
+        po.customer_po_no=request.form["customer_po_no"]
+
+        po.customer_po_date=date.fromisoformat(
+            request.form["customer_po_date"]
+        )
+
+        po.order_received_date=date.fromisoformat(
+            request.form["order_received_date"]
+        )
+
+        po.payment_terms=request.form["payment_terms"]
+
+        po.freight_terms=request.form["freight_terms"]
+
+        po.remarks=request.form["remarks"]
+
+        CustomerPODetail.query.filter_by(
+
+        customer_po_header_id=po.id
+
+        ).delete()
+
+        line_nos = request.form.getlist(
+            "line_no"
+            )
+
+        fg_ids = request.form.getlist(
+                "finished_good_id"
+            )
+
+        qtys = request.form.getlist(
+                "qty"
+            )
+
+        rates = request.form.getlist(
+                "rate"
+            )
+
+        freights = request.form.getlist(
+                "freight"
+            )
+
+        gst_rates = request.form.getlist(
+                "gst_rate"
+            )
+
+        basics = request.form.getlist(
+                "basic_amount"
+            )
+
+        gst_amounts = request.form.getlist(
+                "gst_amount"
+            )
+
+        totals = request.form.getlist(
+                "total_amount"
+            )
+
+        delivery_dates = request.form.getlist(
+                "delivery_date"
+            )
+
+        for (
+
+            line_no,
+
+            fg_id,
+
+            qty,
+
+            rate,
+
+            freight,
+
+            gst_rate,
+
+            basic,
+
+            gst,
+
+            total,
+
+            delivery_date
+
+            ) in zip(
+
+            line_nos,
+
+            fg_ids,
+
+            qtys,
+
+            rates,
+
+            freights,
+
+            gst_rates,
+
+            basics,
+
+            gst_amounts,
+
+            totals,
+
+            delivery_dates
+
+            ):
+
+                if not fg_id:
+
+                    continue
+
+                detail = CustomerPODetail(
+
+                    customer_po_header_id=po.id,
+
+                    line_no=line_no,
+
+                    finished_good_id=int(fg_id),
+
+                    qty=float(qty),
+
+                    rate=float(rate),
+
+                    freight=float(freight),
+
+                    gst_rate=float(gst_rate),
+
+                    basic_amount=float(basic),
+
+                    gst_amount=float(gst),
+
+                    total_amount=float(total),
+
+                    delivery_date=date.fromisoformat(
+                        delivery_date
+                    ),
+
+                    produced_qty=0,
+
+                    fg_qty=0,
+
+                    dispatched_qty=0,
+
+                    pending_qty=float(qty),
+
+                    status="OPEN"
+
+                )
+
+                db.session.add(detail)  
+
+        db.session.commit()
+
+        return redirect(
+
+        url_for(
+
+        "masters.customer_po"
+
+        )
+
+        )
+
+    return render_template(
+
+        "edit_customer_po.html",
+
+        po=po,
+
+        customer_list=customer_list,
+
+        fg_list=fg_list,
+
+        today=date.today().isoformat()
 
     )
 
