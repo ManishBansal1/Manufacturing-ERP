@@ -388,7 +388,8 @@ def add_recipe():
     item_list = ItemMaster.query.filter(
         ItemMaster.item_type.in_([
             "Intermediate Material",
-            "Assembled Goods"
+            "Assembled Goods",
+            "Finished Goods"
         ])
     ).order_by(
         ItemMaster.item_name
@@ -405,16 +406,16 @@ def add_recipe():
             recipe_name=request.form["recipe_name"],
 
             output_item_id=request.form[
-                "output_item_id"
+            "output_item_id"
             ],
 
             production_stage_id=request.form[
                 "production_stage_id"
             ],
 
-            output_qty=request.form[
+            output_qty=float(request.form[
                 "output_qty"
-            ]
+            ])
         )
 
         db.session.add(recipe)
@@ -443,11 +444,13 @@ def edit_recipe(id):
     item_list = ItemMaster.query.filter(
         ItemMaster.item_type.in_([
             "Intermediate Material",
-            "Assembled Goods"
+            "Assembled Goods",
+            "Finished Goods"
         ])
     ).order_by(
         ItemMaster.item_name
     ).all()
+
 
     stage_list = ProductionStageMaster.query.order_by(
         ProductionStageMaster.stage_no
@@ -1992,8 +1995,12 @@ def add_customer_po():
         CustomerMaster.customer_name
     ).all()
 
-    fg_list = FinishedGood.query.order_by(
-        FinishedGood.fg_code
+    item_list = ItemMaster.query.join(
+    ProductionStageMaster
+    ).filter(
+    ProductionStageMaster.stage_name == "Ready for Dispatch"
+    ).order_by(
+    ItemMaster.item_name
     ).all()
 
     if request.method == "POST":
@@ -2048,9 +2055,9 @@ def add_customer_po():
             "line_no"
             )
 
-            fg_ids = request.form.getlist(
-                "finished_good_id"
-            )
+            item_ids = request.form.getlist(
+            "item_id"
+)
 
             qtys = request.form.getlist(
                 "qty"
@@ -2088,7 +2095,7 @@ def add_customer_po():
 
             line_no,
 
-            fg_id,
+            item_id,
 
             qty,
 
@@ -2110,7 +2117,7 @@ def add_customer_po():
 
             line_nos,
 
-            fg_ids,
+            item_ids,
 
             qtys,
 
@@ -2130,7 +2137,7 @@ def add_customer_po():
 
             ):
 
-                if not fg_id:
+                if not item_id:
 
                     continue
 
@@ -2140,7 +2147,7 @@ def add_customer_po():
 
                     line_no=line_no,
 
-                    finished_good_id=int(fg_id),
+                    item_id=int(item_id),
 
                     qty=float(qty),
 
@@ -2193,7 +2200,7 @@ def add_customer_po():
 
         customer_list=customer_list,
 
-        fg_list=fg_list
+        item_list=item_list
 
     )
 
@@ -2239,8 +2246,12 @@ def edit_customer_po(id):
         CustomerMaster.customer_name
     ).all()
 
-    fg_list = FinishedGood.query.order_by(
-        FinishedGood.fg_code
+    item_list = ItemMaster.query.join(
+    ProductionStageMaster
+    ).filter(
+    ProductionStageMaster.stage_name == "Ready for Dispatch"
+    ).order_by(
+    ItemMaster.item_name
     ).all()
 
     if request.method == "POST":
@@ -2273,8 +2284,8 @@ def edit_customer_po(id):
             "line_no"
             )
 
-        fg_ids = request.form.getlist(
-                "finished_good_id"
+        item_ids = request.form.getlist(
+                "item_id"
             )
 
         qtys = request.form.getlist(
@@ -2313,7 +2324,7 @@ def edit_customer_po(id):
 
             line_no,
 
-            fg_id,
+            item_id,
 
             qty,
 
@@ -2335,7 +2346,7 @@ def edit_customer_po(id):
 
             line_nos,
 
-            fg_ids,
+            item_ids,
 
             qtys,
 
@@ -2355,7 +2366,7 @@ def edit_customer_po(id):
 
             ):
 
-                if not fg_id:
+                if not item_id:
 
                     continue
 
@@ -2365,7 +2376,7 @@ def edit_customer_po(id):
 
                     line_no=line_no,
 
-                    finished_good_id=int(fg_id),
+                    item_id=int(item_id),
 
                     qty=float(qty),
 
@@ -2419,7 +2430,7 @@ def edit_customer_po(id):
 
         customer_list=customer_list,
 
-        fg_list=fg_list,
+        item_list=item_list,
 
         today=date.today().isoformat()
 

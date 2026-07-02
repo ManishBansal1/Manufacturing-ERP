@@ -63,6 +63,13 @@ selected
 Assembled Goods
 </option>
 
+<option value="Finished Goods"
+{% if item.item_type == "Finished Goods" %}
+selected
+{% endif %}>
+Finished Goods
+</option>
+
 <option value="Scrap"
 {% if item.item_type == "Scrap" %}
 selected

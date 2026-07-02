@@ -285,11 +285,6 @@ Cancel
 
 </div>
 
-
-
-
-
-
 <script>
 
 let rowNo = 0;
@@ -314,8 +309,8 @@ function addRow(){
         <td>
 
             <select
-            name="finished_good_id"
-            class="form-control fg">
+            name="item_id"
+            class="form-control item">
 
                 <option value="">
 
@@ -323,13 +318,15 @@ function addRow(){
 
                 </option>
 
-                {% for fg in fg_list %}
+                {% for item in item_list %}
 
                 <option
 
-                value="{{ fg.id }}">
+                value="{{ item.id }}">
 
-                {{ fg.fg_code }} - {{ fg.fg_name }}
+                <!--{{ item.item_code }} - {{ item.item_name }} -->
+
+                {{ item.item_name }}
 
                 </option>
 

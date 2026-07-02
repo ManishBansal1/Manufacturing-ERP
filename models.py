@@ -219,6 +219,8 @@ class RecipeHeader(db.Model):
         "ProductionStageMaster"
     )
 
+    
+
     inputs = db.relationship(
     "RecipeInput",
     backref="recipe",
@@ -915,12 +917,12 @@ class CustomerPODetail(db.Model):
         db.String(30)
     )
 
-    finished_good_id = db.Column(
-        db.Integer,
-        db.ForeignKey(
-            "finished_goods.id"
-        ),
-        nullable=False
+    item_id = db.Column(
+    db.Integer,
+    db.ForeignKey(
+        "item_master.id"
+    ),
+    nullable=False
     )
 
     qty = db.Column(
@@ -987,6 +989,6 @@ class CustomerPODetail(db.Model):
         default="OPEN"
     )
 
-    finished_good = db.relationship(
-        "FinishedGood"
+    item = db.relationship(
+        "ItemMaster"
     )

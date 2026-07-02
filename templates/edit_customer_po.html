@@ -265,22 +265,24 @@ value="{{ row.line_no }}">
 <td>
 
 <select
-name="finished_good_id"
-class="form-control fg">
+name="item_id"
+class="form-control item">
 
-{% for fg in fg_list %}
+{% for item in item_list %}
 
 <option
 
-value="{{ fg.id }}"
+value="{{ item.id }}"
 
-{% if fg.id == row.finished_good_id %}
+{% if item.id == row.item_id %}
 
 selected
 
 {% endif %}>
 
-{{ fg.fg_code }} - {{ fg.fg_name }}
+<!--{{ item.item_code }} - {{ item.item_name }} -->
+
+{{ item.item_name }}
 
 </option>
 
@@ -496,8 +498,8 @@ function addRow(){
         <td>
 
             <select
-            name="finished_good_id"
-            class="form-control fg">
+            name="item_id"
+            class="form-control item">
 
                 <option value="">
 
@@ -505,14 +507,13 @@ function addRow(){
 
                 </option>
 
-                {% for fg in fg_list %}
+                {% for item in item_list %}
 
                 <option
 
-                value="{{ fg.id }}">
-
-                {{ fg.fg_code }} - {{ fg.fg_name }}
-
+                value="{{ item.id }}">
+                <!--{{ item.item_code }} - {{ item.item_name }} -->
+                {{ item.item_name }}
                 </option>
 
                 {% endfor %}
