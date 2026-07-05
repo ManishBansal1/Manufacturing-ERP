@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Transporter Details</h2>
+
+<div class="card">
+
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<tr>
+
+<th width="250">
+
+Transporter Code
+
+</th>
+
+<td>
+
+{{ transporter.transporter_code }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Transporter Name
+
+</th>
+
+<td>
+
+{{ transporter.transporter_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Contact Person
+
+</th>
+
+<td>
+
+{{ transporter.contact_person }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Mobile No
+
+</th>
+
+<td>
+
+{{ transporter.mobile_no }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Email
+
+</th>
+
+<td>
+
+{{ transporter.email }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Address
+
+</th>
+
+<td>
+
+{{ transporter.address }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+GSTIN
+
+</th>
+
+<td>
+
+{{ transporter.gstin }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Status
+
+</th>
+
+<td>
+
+{% if transporter.active %}
+
+Active
+
+{% else %}
+
+Inactive
+
+{% endif %}
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<br>
+
+<a
+href="/transporter"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+<a
+href="/transporter/edit/{{ transporter.id }}"
+class="btn btn-primary">
+
+Edit
+
+</a>
+
+</div>
+
+{% endblock %}

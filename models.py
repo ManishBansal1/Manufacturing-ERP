@@ -992,3 +992,204 @@ class CustomerPODetail(db.Model):
     item = db.relationship(
         "ItemMaster"
     )
+
+class TransporterMaster(db.Model):
+
+    __tablename__ = "transporter_master"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    transporter_code = db.Column(
+        db.String(20),
+        unique=True,
+        nullable=False
+    )
+
+    transporter_name = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    contact_person = db.Column(
+        db.String(100)
+    )
+
+    mobile_no = db.Column(
+        db.String(20)
+    )
+
+    email = db.Column(
+        db.String(100)
+    )
+
+    address = db.Column(
+        db.String(500)
+    )
+
+    gstin = db.Column(
+        db.String(20)
+    )
+
+    active = db.Column(
+        db.Boolean,
+        default=True
+    )
+
+class DestinationMaster(db.Model): 
+    __tablename__ = "destination_master" 
+    
+    id = db.Column( db.Integer, primary_key=True ) 
+    
+    destination_name = db.Column( db.String(200), nullable=False, unique=True ) 
+    
+    state_name = db.Column( db.String(100) ) 
+    
+    active = db.Column( db.Boolean, default=True )
+
+class SalesInvoiceHeader(db.Model):
+
+    __tablename__ = "sales_invoice_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    invoice_no = db.Column(
+        db.String(50),
+        nullable=False,
+        unique=True
+    )
+
+    invoice_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    customer_po_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_po_header.id"),
+        nullable=False
+    )
+
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_master.id"),
+        nullable=False
+    )
+
+    destination_id = db.Column(
+        db.Integer,
+        db.ForeignKey("destination_master.id"),
+        nullable=False
+    )
+
+    transporter_id = db.Column(
+        db.Integer,
+        db.ForeignKey("transporter_master.id"),
+        nullable=False
+    )
+
+    vehicle_no = db.Column(
+        db.String(50)
+    )
+
+    lr_no = db.Column(
+        db.String(100)
+    )
+
+    eway_bill_no = db.Column(
+        db.String(100)
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    status = db.Column(
+        db.String(30),
+        default="Pending RNote"
+    )
+
+    customer = db.relationship("CustomerMaster")
+
+    customer_po = db.relationship("CustomerPOHeader")
+
+    destination = db.relationship("DestinationMaster")
+
+    transporter = db.relationship("TransporterMaster")
+
+    details = db.relationship(
+        "SalesInvoiceDetail",
+        backref="invoice",
+        cascade="all, delete-orphan"
+    )
+
+class SalesInvoiceDetail(db.Model):
+
+    __tablename__ = "sales_invoice_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    sales_invoice_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_invoice_header.id"),
+        nullable=False
+    )
+
+    customer_po_detail_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_po_detail.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    dispatch_qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    freight = db.Column(
+        db.Float,
+        default=0
+    )
+
+    gst_rate = db.Column(
+        db.Float,
+        default=18
+    )
+
+    basic_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    gst_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    total_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    item = db.relationship("ItemMaster")
+
+    po_detail = db.relationship("CustomerPODetail")

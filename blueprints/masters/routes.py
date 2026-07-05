@@ -32,6 +32,8 @@ from models import PurchaseReceiptDetail
 from models import CustomerMaster
 from models import CustomerPOHeader
 from models import CustomerPODetail
+from models import TransporterMaster
+from models import DestinationMaster
 
 
 
@@ -2463,3 +2465,155 @@ def cancel_customer_po(id):
 
     )
 
+@masters_bp.route("/transporter")
+@login_required
+def transporter():
+
+    transporter_list = TransporterMaster.query.order_by(
+        TransporterMaster.transporter_name
+    ).all()
+
+    return render_template(
+        "transporter.html",
+        transporter_list=transporter_list
+    )
+
+@masters_bp.route(
+    "/transporter/add",
+    methods=["GET","POST"]
+)
+@login_required
+def add_transporter():
+
+    if request.method == "POST":
+
+        transporter = TransporterMaster(
+
+            transporter_code=request.form["transporter_code"],
+
+            transporter_name=request.form["transporter_name"],
+
+            contact_person=request.form["contact_person"],
+
+            mobile_no=request.form["mobile_no"],
+
+            email=request.form["email"],
+
+            address=request.form["address"],
+
+            gstin=request.form["gstin"],
+
+            active="active" in request.form
+
+        )
+
+        db.session.add(transporter)
+
+        db.session.commit()
+
+        return redirect(
+            url_for("masters.transporter")
+        )
+
+    return render_template(
+        "add_transporter.html"
+    )
+
+@masters_bp.route(
+    "/transporter/edit/<int:id>",
+    methods=["GET","POST"]
+)
+@login_required
+def edit_transporter(id):
+
+    transporter = TransporterMaster.query.get_or_404(id)
+
+    if request.method == "POST":
+
+        transporter.transporter_code = request.form["transporter_code"]
+
+        transporter.transporter_name = request.form["transporter_name"]
+
+        transporter.contact_person = request.form["contact_person"]
+
+        transporter.mobile_no = request.form["mobile_no"]
+
+        transporter.email = request.form["email"]
+
+        transporter.address = request.form["address"]
+
+        transporter.gstin = request.form["gstin"]
+
+        transporter.active = "active" in request.form
+
+        db.session.commit()
+
+        return redirect(
+            url_for("masters.transporter")
+        )
+
+    return render_template(
+        "edit_transporter.html",
+        transporter=transporter
+    )
+
+@masters_bp.route(
+    "/transporter/view/<int:id>"
+)
+@login_required
+def view_transporter(id):
+
+    print("Inside view transporter")
+    print(id)
+
+    transporter = TransporterMaster.query.get_or_404(id)
+
+    return render_template(
+        "view_transporter.html",
+        transporter=transporter
+    )
+
+@masters_bp.route("/destination")
+@login_required
+def destination():
+
+    destination_list = DestinationMaster.query.order_by(
+        DestinationMaster.destination_name
+    ).all()
+
+    return render_template(
+        "destination.html",
+        destination_list=destination_list
+    )
+
+@masters_bp.route( "/destination/add", methods=["GET", "POST"] ) 
+@login_required
+def add_destination():
+    if request.method == "POST":
+        destination = DestinationMaster(
+            destination_name=request.form["destination_name"],
+            state_name=request.form["state_name"],
+            active="active" in request.form
+        )
+        db.session.add(destination)
+        db.session.commit()
+        return redirect( url_for("masters.destination") )
+    return render_template("add_destination.html")
+
+@masters_bp.route( "/destination/edit/<int:id>", methods=["GET", "POST"] ) 
+@login_required
+def edit_destination(id):
+    destination = DestinationMaster.query.get_or_404(id)
+    if request.method == "POST":
+        destination.destination_name = request.form[ "destination_name" ]
+        destination.state_name = request.form[ "state_name" ]
+        destination.active = "active" in request.form
+        db.session.commit()
+        return redirect( url_for("masters.destination") )
+    return render_template( "edit_destination.html", destination=destination )
+
+@masters_bp.route( "/destination/view/<int:id>" ) 
+@login_required
+def view_destination(id):
+    destination = DestinationMaster.query.get_or_404(id)
+    return render_template( "view_destination.html", destination=destination )

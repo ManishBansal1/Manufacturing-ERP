@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Edit Transporter</h2>
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+
+<label>Transporter Code</label>
+
+<input
+type="text"
+name="transporter_code"
+value="{{ transporter.transporter_code }}"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-8 mb-3">
+
+<label>Transporter Name</label>
+
+<input
+type="text"
+name="transporter_name"
+value="{{ transporter.transporter_name }}"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label>Contact Person</label>
+
+<input
+type="text"
+name="contact_person"
+value="{{ transporter.contact_person }}"
+class="form-control">
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label>Mobile No</label>
+
+<input
+type="text"
+name="mobile_no"
+value="{{ transporter.mobile_no }}"
+class="form-control">
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label>Email</label>
+
+<input
+type="email"
+name="email"
+value="{{ transporter.email }}"
+class="form-control">
+
+</div>
+
+<div class="col-md-8 mb-3">
+
+<label>Address</label>
+
+<textarea
+name="address"
+class="form-control">{{ transporter.address }}</textarea>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label>GSTIN</label>
+
+<input
+type="text"
+name="gstin"
+value="{{ transporter.gstin }}"
+class="form-control">
+
+</div>
+
+<div class="col-md-12 mb-3">
+
+<div class="form-check">
+
+<input
+class="form-check-input"
+type="checkbox"
+name="active"
+{% if transporter.active %}
+checked
+{% endif %}>
+
+<label class="form-check-label">
+
+Active
+
+</label>
+
+</div>
+
+</div>
+
+</div>
+
+<button
+class="btn btn-success">
+
+Update
+
+</button>
+
+<a
+href="/transporter"
+class="btn btn-secondary">
+
+Cancel
+
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

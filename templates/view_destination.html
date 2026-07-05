@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Destination Details</h2>
+
+<div class="card">
+
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<tr>
+
+<th width="250">
+
+Destination Code
+
+</th>
+
+<td>
+
+{{ destination.id }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Destination Name
+
+</th>
+
+<td>
+
+{{ destination.destination_name }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+State
+
+</th>
+
+<td>
+
+{{ destination.state_name }}
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<th>
+
+Status
+
+</th>
+
+<td>
+
+{% if destination.active %}
+
+Active
+
+{% else %}
+
+Inactive
+
+{% endif %}
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<br>
+
+<a
+href="/destination"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+<a
+href="/destination/edit/{{ destination.id }}"
+class="btn btn-primary">
+
+Edit
+
+</a>
+
+</div>
+
+{% endblock %}

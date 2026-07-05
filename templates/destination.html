@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<h2>Destination Master</h2>
+
+<a href="/destination/add" class="btn btn-success">
+Add Destination
+</a>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+<th>Destination</th>
+<th>State</th>
+<th>Status</th>
+<th width="180">Action</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for d in destination_list %}
+
+<tr>
+
+<td>{{ d.destination_name }}</td>
+<td>{{ d.state_name }}</td>
+
+<td>
+{% if d.active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Inactive</span>
+{% endif %}
+</td>
+
+<td>
+
+<a href="/destination/view/{{ d.id }}"
+class="btn btn-info btn-sm">
+View
+</a>
+
+<a href="/destination/edit/{{ d.id }}"
+class="btn btn-warning btn-sm">
+Edit
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}
+
