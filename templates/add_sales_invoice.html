@@ -165,6 +165,39 @@ Select Transporter
 
 </div>
 
+<div class="col-md-6 mb-3">
+
+<label>
+
+Dispatch Location
+
+</label>
+
+<select
+name="location_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Location
+
+</option>
+
+{% for location in location_list %}
+
+<option value="{{ location.id }}">
+
+{{ location.location_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
 <div class="col-md-3 mb-3">
 
 <label>
@@ -253,6 +286,8 @@ id="invoice-lines-table">
 Dispatch Qty
 
 </th>
+
+
 
 <th>Rate</th>
 

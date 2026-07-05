@@ -2654,17 +2654,187 @@ def add_sales_invoice():
         DestinationMaster.destination_name
     ).all()
 
+    location_list = LocationMaster.query.order_by(
+    LocationMaster.location_name
+    ).all()
+
     transporter_list = TransporterMaster.query.filter_by(
         active=True
     ).order_by(
         TransporterMaster.transporter_name
     ).all()
 
+    
+    
+    
     if request.method == "POST":
 
-        # Posting logic will come later
+        invoice = SalesInvoiceHeader(
 
-        pass
+            invoice_no=request.form["invoice_no"],
+
+            invoice_date = date.fromisoformat(
+                request.form["invoice_date"]
+            ),
+
+            customer_po_header_id=request.form["customer_po_header_id"],
+
+            customer_id=CustomerPOHeader.query.get(
+                request.form["customer_po_header_id"]
+            ).customer_id,
+
+            destination_id=request.form["destination_id"],
+
+            transporter_id=request.form["transporter_id"],
+
+            vehicle_no=request.form["vehicle_no"],
+
+            lr_no=request.form["lr_no"],
+
+            location_id=int(
+            request.form["location_id"]
+            ),
+
+            eway_bill_no=request.form["eway_bill_no"],
+
+            remarks=request.form["remarks"],
+
+            status="Pending RNote"
+
+        )
+
+        db.session.add(invoice)
+
+        db.session.flush()
+
+        po_detail_ids = request.form.getlist("po_detail_id")
+
+        dispatch_qtys = request.form.getlist("dispatch_qty")
+
+        for i in range(len(po_detail_ids)):
+
+            qty=float(dispatch_qtys[i])
+
+            if qty<=0:
+                continue
+
+            po_line=CustomerPODetail.query.get(
+                po_detail_ids[i]
+                )
+            
+            basic=(
+
+                po_line.rate+
+
+                po_line.freight
+
+            )*qty
+
+            gst=basic*po_line.gst_rate/100
+
+            total=basic+gst
+
+            invoice_line=SalesInvoiceDetail(
+
+                sales_invoice_header_id=invoice.id,
+
+                customer_po_detail_id=po_line.id,
+
+                item_id=po_line.item_id,
+
+                dispatch_qty=qty,
+
+                rate=po_line.rate,
+
+                freight=po_line.freight,
+
+                gst_rate=po_line.gst_rate,
+
+                basic_amount=basic,
+
+                gst_amount=gst,
+
+                total_amount=total
+
+                )
+
+            db.session.add(invoice_line)
+
+            ledger=InventoryLedger(
+
+                trans_date=invoice.invoice_date,
+
+                item_id=po_line.item_id,
+
+                location_id=int(request.form["location_id"]),
+
+                qty_in=0,
+
+                qty_out=qty,
+
+                reference_type="Sales Invoice",
+
+                reference_id=invoice.id,
+
+                remarks=invoice.invoice_no
+
+            )
+
+            db.session.add(ledger)
+
+            # -----------------------------
+            # Update Customer PO Detail
+            # -----------------------------
+
+            po_line.dispatched_qty += qty
+
+            po_line.pending_qty = (
+                po_line.qty -
+                po_line.dispatched_qty
+            )
+
+            if po_line.pending_qty <= 0:
+
+                po_line.pending_qty = 0
+
+                po_line.status = "CLOSED"
+
+            else:
+
+                po_line.status = "PARTIAL"
+
+        # -----------------------------------
+        # Update PO Header Status
+        # -----------------------------------
+
+        po_header = CustomerPOHeader.query.get(
+            invoice.customer_po_header_id
+        )
+
+        all_closed = True
+
+        for line in po_header.details:
+
+            if line.pending_qty > 0:
+
+                all_closed = False
+                break
+
+        if all_closed:
+
+            po_header.status = "CLOSED"
+
+        else:
+
+            po_header.status = "PARTIAL"
+
+        db.session.commit()
+
+
+
+
+
+
 
     return render_template(
 
@@ -2674,7 +2844,9 @@ def add_sales_invoice():
 
         destination_list=destination_list,
 
-        transporter_list=transporter_list
+        transporter_list=transporter_list,
+
+        location_list=location_list
 
     )
 

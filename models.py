@@ -1105,6 +1105,12 @@ class SalesInvoiceHeader(db.Model):
         db.String(100)
     )
 
+    location_id = db.Column(
+    db.Integer,
+    db.ForeignKey("location_master.id"),
+    nullable=False
+    )
+
     remarks = db.Column(
         db.String(500)
     )
@@ -1121,6 +1127,8 @@ class SalesInvoiceHeader(db.Model):
     destination = db.relationship("DestinationMaster")
 
     transporter = db.relationship("TransporterMaster")
+
+    location = db.relationship("LocationMaster")
 
     details = db.relationship(
         "SalesInvoiceDetail",
