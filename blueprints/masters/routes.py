@@ -6,6 +6,7 @@ from flask import (
     url_for)
 
 from flask_login import login_required
+from flask import jsonify
 
 from sqlalchemy import func
 
@@ -34,7 +35,8 @@ from models import CustomerPOHeader
 from models import CustomerPODetail
 from models import TransporterMaster
 from models import DestinationMaster
-
+from models import SalesInvoiceHeader
+from models import SalesInvoiceDetail
 
 
 masters_bp = Blueprint(
@@ -2617,3 +2619,115 @@ def edit_destination(id):
 def view_destination(id):
     destination = DestinationMaster.query.get_or_404(id)
     return render_template( "view_destination.html", destination=destination )
+
+
+@masters_bp.route("/sales-invoice")
+@login_required
+def sales_invoice():
+
+    invoice_list = SalesInvoiceHeader.query.order_by(
+        SalesInvoiceHeader.invoice_date.desc(),
+        SalesInvoiceHeader.invoice_no.desc()
+    ).all()
+
+    return render_template(
+        "sales_invoice.html",
+        invoice_list=invoice_list
+    )
+
+@masters_bp.route(
+    "/sales-invoice/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_sales_invoice():
+
+    customer_po_list = CustomerPOHeader.query.filter(
+        CustomerPOHeader.status.in_(["OPEN", "PARTIAL"])
+    ).order_by(
+        CustomerPOHeader.customer_po_no
+    ).all()
+
+    destination_list = DestinationMaster.query.filter_by(
+        active=True
+    ).order_by(
+        DestinationMaster.destination_name
+    ).all()
+
+    transporter_list = TransporterMaster.query.filter_by(
+        active=True
+    ).order_by(
+        TransporterMaster.transporter_name
+    ).all()
+
+    if request.method == "POST":
+
+        # Posting logic will come later
+
+        pass
+
+    return render_template(
+
+        "add_sales_invoice.html",
+
+        customer_po_list=customer_po_list,
+
+        destination_list=destination_list,
+
+        transporter_list=transporter_list
+
+    )
+
+
+@masters_bp.route(
+    "/sales-invoice/get-po-details/<int:po_id>"
+)
+@login_required
+def get_po_details(po_id):
+
+    po = CustomerPOHeader.query.get_or_404(po_id)
+
+    result = {
+        "customer": po.customer.customer_name,
+        "lines": []
+    }
+
+    for line in po.details:
+
+        inventory = InventoryLedger.query.filter_by(
+            item_id=line.item_id
+        ).first()
+
+        available_qty = (
+        db.session.query(
+        db.func.sum(
+            InventoryLedger.qty_in -
+            InventoryLedger.qty_out
+        )
+        )
+        .filter(
+        InventoryLedger.item_id == line.item_id
+        )
+        .scalar()
+        or 0
+        )
+
+        result["lines"].append({
+
+            "po_detail_id": line.id,
+
+            "item_name": line.item.item_name,
+
+            "ordered_qty": line.qty,
+
+            "pending_qty": line.pending_qty,
+
+            "rate": line.rate,
+
+            "freight": line.freight,
+
+            "gst_rate": line.gst_rate
+
+        })
+
+    return jsonify(result)

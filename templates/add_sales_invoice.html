@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+Add Sales Invoice
+
+</h2>
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-3 mb-3">
+
+<label>
+
+Invoice No
+
+</label>
+
+<input
+type="text"
+name="invoice_no"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label>
+
+Invoice Date
+
+</label>
+
+<input
+type="date"
+name="invoice_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label>
+
+Customer PO
+
+</label>
+
+<select
+name="customer_po_header_id"
+id="customer_po"
+class="form-select"
+required>
+
+<option value="">
+
+Select Customer PO
+
+</option>
+
+{% for po in customer_po_list %}
+
+<option value="{{ po.id }}">
+
+{{ po.customer_po_no }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label>
+
+Customer
+
+</label>
+
+<input
+type="text"
+id="customer_name"
+class="form-control"
+readonly>
+
+
+</div>
+
+
+
+<div class="col-md-6 mb-3">
+
+<label>
+
+Destination
+
+</label>
+
+<select
+name="destination_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Destination
+
+</option>
+
+{% for destination in destination_list %}
+
+<option value="{{ destination.id }}">
+
+{{ destination.destination_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label>
+
+Transporter
+
+</label>
+
+<select
+name="transporter_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Transporter
+
+</option>
+
+{% for transporter in transporter_list %}
+
+<option value="{{ transporter.id }}">
+
+{{ transporter.transporter_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label>
+
+Vehicle No
+
+</label>
+
+<input
+type="text"
+name="vehicle_no"
+class="form-control">
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label>
+
+LR No
+
+</label>
+
+<input
+type="text"
+name="lr_no"
+class="form-control">
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label>
+
+E-way Bill No
+
+</label>
+
+<input
+type="text"
+name="eway_bill_no"
+class="form-control">
+
+</div>
+
+<div class="col-md-12 mb-3">
+
+<label>
+
+Remarks
+
+</label>
+
+<textarea
+name="remarks"
+class="form-control">
+
+</textarea>
+
+</div>
+
+</div>
+
+
+
+<hr>
+
+<h5>Invoice Items</h5>
+
+<table
+class="table table-bordered"
+id="invoice-lines-table">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Ordered Qty</th>
+
+<th>Pending Qty</th>
+
+<th width="120">
+
+Dispatch Qty
+
+</th>
+
+<th>Rate</th>
+
+<th>Freight</th>
+
+<th>Basic Amount</th>
+
+<th>GST</th>
+
+<th>Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+
+
+
+
+<button
+class="btn btn-success">
+
+Save Invoice
+
+</button>
+
+<a
+href="/sales-invoice"
+class="btn btn-secondary">
+
+Cancel
+
+</a>
+
+</form>
+
+</div>
+
+
+<!--
+<script>
+
+$("#customer_po").change(function () {
+
+    let po_id = $(this).val();
+
+    console.log("PO Selected:", po_id);
+
+    let url = "/sales-invoice/get-po-details/" + po_id;
+
+    console.log("Calling URL:", url);
+
+    $.get(url, function(data){
+
+        console.log(data);
+
+    });
+
+});
+
+</script>
+
+-->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    $("#customer_po").on("change", function () {
+
+        let po_id = $(this).val();
+
+        if (!po_id)
+            return;
+
+        console.log("PO Changed");
+        console.log(po_id);
+
+        $.get(
+            "/sales-invoice/get-po-details/" + po_id,
+            function(data){
+
+                console.log(data);
+
+                $("#customer_name").val(data.customer);
+
+                let tbody=$("#invoice-lines-table tbody");
+
+                tbody.empty();
+
+                data.lines.forEach(function(line){
+
+                    tbody.append(`
+<tr>
+
+<td>
+${line.item_name}
+<input type="hidden"
+name="po_detail_id"
+value="${line.po_detail_id}">
+</td>
+
+<td>${line.ordered_qty}</td>
+
+
+
+<td>${line.pending_qty}</td>
+
+
+<td>
+
+<input
+type="number"
+class="form-control dispatch_qty"
+name="dispatch_qty"
+min="0"
+max="${line.pending_qty}"
+value = "0"
+
+data-rate="${line.rate}"
+
+data-freight="${line.freight}"
+
+data-gst="${line.gst_rate}">
+
+</td>
+
+<td>
+
+${line.rate.toFixed(2)}
+
+</td>
+
+<td>
+
+${line.freight.toFixed(2)}
+
+</td>
+
+<td class="basic">
+
+0.00
+
+</td>
+
+<td class="gst">
+
+0.00
+
+</td>
+
+<td class="total">
+
+0.00
+
+</td>
+
+</tr>
+
+`);
+
+
+
+                });
+
+                $(document).on(
+
+                    "input",
+
+                    ".dispatch_qty",
+
+                    function(){
+
+                        let qty=parseFloat($(this).val())||0;
+
+                        let rate=parseFloat($(this).data("rate"));
+
+                        let freight=parseFloat($(this).data("freight"));
+
+                        let gstRate=parseFloat($(this).data("gst"));
+
+                        let basic=(rate+freight)*qty;
+
+                        let gst=basic*gstRate/100;
+
+                        let total=basic+gst;
+
+                        let row=$(this).closest("tr");
+
+                        row.find(".basic").text(
+
+                            basic.toFixed(2)
+
+                        );
+
+                        row.find(".gst").text(
+
+                            gst.toFixed(2)
+
+                        );
+
+                        row.find(".total").text(
+
+                            total.toFixed(2)
+
+                        );
+
+                    });
+
+            }
+        );
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

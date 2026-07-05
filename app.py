@@ -12,6 +12,8 @@ from blueprints.dashboard.routes import dashboard_bp
 
 from blueprints.masters.routes import masters_bp
 
+from blueprints.sales import sales_bp
+
 
 app = Flask(__name__)
 
@@ -43,3 +45,9 @@ def home():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+app.register_blueprint(
+    sales_bp,
+    url_prefix="/sales"
+)

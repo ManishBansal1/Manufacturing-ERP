@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<h2>
+
+Sales Invoice
+
+</h2>
+
+<a
+href="/sales-invoice/add"
+class="btn btn-success">
+
+Add Invoice
+
+</a>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>
+
+Invoice No
+
+</th>
+
+<th>
+
+Invoice Date
+
+</th>
+
+<th>
+
+Customer
+
+</th>
+
+<th>
+
+Customer PO
+
+</th>
+
+<th>
+
+Destination
+
+</th>
+
+<th>
+
+Status
+
+</th>
+
+<th width="200">
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for invoice in invoice_list %}
+
+<tr>
+
+<td>
+
+{{ invoice.invoice_no }}
+
+</td>
+
+<td>
+
+{{ invoice.invoice_date.strftime("%d-%m-%Y") }}
+
+</td>
+
+<td>
+
+{{ invoice.customer.customer_name }}
+
+</td>
+
+<td>
+
+{{ invoice.customer_po.customer_po_no }}
+
+</td>
+
+<td>
+
+{{ invoice.destination.destination_name }}
+
+</td>
+
+<td>
+
+{{ invoice.status }}
+
+</td>
+
+<td>
+
+<a
+href="/sales-invoice/view/{{ invoice.id }}"
+class="btn btn-info btn-sm">
+
+View
+
+</a>
+
+<a
+href="/sales-invoice/edit/{{ invoice.id }}"
+class="btn btn-warning btn-sm">
+
+Edit
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}
