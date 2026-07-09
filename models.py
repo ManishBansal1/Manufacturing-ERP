@@ -1201,3 +1201,121 @@ class SalesInvoiceDetail(db.Model):
     item = db.relationship("ItemMaster")
 
     po_detail = db.relationship("CustomerPODetail")
+
+class ReceivingNoteHeader(db.Model):
+
+    __tablename__ = "receiving_note_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    rnote_no = db.Column(
+        db.String(50),
+        unique=True,
+        nullable=False
+    )
+
+    rnote_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    sales_invoice_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_invoice_header.id"),
+        nullable=False
+    )
+
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_master.id"),
+        nullable=False
+    )
+
+    received_by = db.Column(
+        db.String(150)
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    status = db.Column(
+        db.String(30),
+        default="OPEN"
+    )
+
+    invoice = db.relationship(
+        "SalesInvoiceHeader"
+    )
+
+    customer = db.relationship(
+        "CustomerMaster"
+    )
+
+    details = db.relationship(
+
+    "ReceivingNoteDetail",
+
+    backref="receiving_note",
+
+    cascade="all, delete-orphan"
+
+    )
+
+class ReceivingNoteDetail(db.Model):
+
+    __tablename__ = "receiving_note_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    receiving_note_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("receiving_note_header.id"),
+        nullable=False
+    )
+
+    sales_invoice_detail_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_invoice_detail.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    dispatch_qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    received_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    rejected_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    short_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    remarks = db.Column(
+        db.String(300)
+    )
+
+    item = db.relationship("ItemMaster")
+
+    invoice_detail = db.relationship("SalesInvoiceDetail")

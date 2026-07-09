@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+Add Receiving Note
+
+</h2>
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>RNote No</label>
+
+<input
+type="text"
+name="rnote_no"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-4">
+
+<label>Date</label>
+
+<input
+type="date"
+name="rnote_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-4">
+
+<label>Invoice</label>
+
+<select
+id="sales_invoice"
+name="sales_invoice_header_id"
+class="form-select"
+required>
+
+
+
+
+<option value="">Select Invoice</option>
+
+{% for invoice in invoice_list %}
+
+<option value="{{ invoice.id }}">
+
+{{ invoice.invoice_no }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+<div class="row mt-3">
+
+<div class="col-md-4">
+
+<label>
+
+Customer
+
+</label>
+
+<input
+type="text"
+id="customer_name"
+class="form-control"
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Invoice No
+
+</label>
+
+<input
+type="text"
+id="invoice_no"
+class="form-control"
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Invoice Date
+
+</label>
+
+<input
+type="text"
+id="invoice_date"
+class="form-control"
+readonly>
+
+</div>
+
+</div>
+
+
+<!-- Rnote details  -->
+
+<hr>
+
+<h5>Invoice Items</h5>
+
+
+
+<table
+class="table table-bordered"
+id="invoice-items">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Dispatch Qty</th>
+
+<th width="140">Received Qty</th>
+
+<th width="140">Short Qty</th>
+
+<th width="140">Rejected Qty</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+
+<br>
+
+<button
+class="btn btn-success">
+
+Save
+
+</button>
+
+<a
+href="/receiving-note"
+class="btn btn-secondary">
+
+Cancel
+
+</a>
+
+</form>
+
+</div>
+
+<script>
+
+$(function(){
+
+$("#sales_invoice").change(function(){
+
+let invoice=$(this).val();
+
+if(invoice=="")
+return;
+
+$.get(
+
+"/receiving-note/get-invoice-details/"+invoice,
+
+function(data){
+
+$("#customer_name").val(
+data.customer
+);
+
+$("#invoice_no").val(
+data.invoice_no
+);
+
+$("#invoice_date").val(
+data.invoice_date
+);
+
+let tbody=$("#invoice-items tbody");
+
+tbody.empty();
+
+data.lines.forEach(function(line){
+
+tbody.append(`
+
+<tr>
+
+<td>
+
+${line.item_name}
+
+<input
+type="hidden"
+name="invoice_detail_id"
+value="${line.invoice_detail_id}">
+
+<input
+type="hidden"
+name="item_id"
+value="${line.item_id}">
+
+</td>
+
+<td class="dispatch_qty">
+
+${line.dispatch_qty}
+
+</td>
+
+<td>
+
+<input
+type="number"
+name="received_qty"
+class="form-control received_qty"
+readonly
+min="0"
+value="${line.dispatch_qty}">
+
+</td>
+
+<td>
+
+<input
+type="number"
+name="short_qty"
+class="form-control short_qty"
+min="0"
+value="0">
+
+</td>
+
+<td>
+
+<input
+type="number"
+name="rejected_qty"
+class="form-control rejected_qty"
+min="0"
+value="0">
+
+</td>
+
+</tr>
+
+`);
+
+});
+
+}
+
+);
+
+});
+
+});
+
+</script>
+
+<script>
+
+$(document).on(
+
+"input",
+
+".short_qty, .rejected_qty",
+
+function(){
+
+    let row = $(this).closest("tr");
+
+    let dispatch = parseFloat(
+        row.find(".dispatch_qty").text()
+    ) || 0;
+
+    let shortQty = parseFloat(
+        row.find(".short_qty").val()
+    ) || 0;
+
+    let rejectedQty = parseFloat(
+        row.find(".rejected_qty").val()
+    ) || 0;
+
+    let received = dispatch - shortQty - rejectedQty;
+
+    if(received < 0){
+
+        alert("Short Qty + Rejected Qty cannot exceed Dispatch Qty");
+
+        $(this).val(0);
+
+        shortQty = parseFloat(
+            row.find(".short_qty").val()
+        ) || 0;
+
+        rejectedQty = parseFloat(
+            row.find(".rejected_qty").val()
+        ) || 0;
+
+        received = dispatch - shortQty - rejectedQty;
+
+    }
+
+    row.find(".received_qty").val(received);
+
+});
+
+</script>
+
+{% endblock %}

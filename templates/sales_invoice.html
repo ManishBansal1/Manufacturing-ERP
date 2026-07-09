@@ -126,7 +126,7 @@ View
 
 </a>
 
-{% if invoice.status=="CANCELLED" %}
+{% if invoice.status == "CANCELLED" %}
 
 <span class="badge bg-danger">
 
@@ -134,7 +134,7 @@ Cancelled
 
 </span>
 
-{% else %}
+{% elif invoice.status == "Pending RNote" %}
 
 <button
 class="btn btn-danger btn-sm"
@@ -146,6 +146,17 @@ data-bs-target="#cancelInvoiceModal"
 data-id="{{ invoice.id }}"
 
 data-number="{{ invoice.invoice_no }}">
+
+Cancel
+
+</button>
+
+{% else %}
+
+<button
+class="btn btn-danger btn-sm"
+disabled
+title="Receiving Note has already been created. Cancel the Receiving Note first.">
 
 Cancel
 

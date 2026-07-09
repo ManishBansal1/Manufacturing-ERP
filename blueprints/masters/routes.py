@@ -37,7 +37,8 @@ from models import TransporterMaster
 from models import DestinationMaster
 from models import SalesInvoiceHeader
 from models import SalesInvoiceDetail
-
+from models import ReceivingNoteHeader
+from models import ReceivingNoteDetail
 
 masters_bp = Blueprint(
     "masters",
@@ -3085,4 +3086,192 @@ def cancel_sales_invoice(id):
     )
 
 
-    
+@masters_bp.route("/receiving-note")
+@login_required
+def receiving_note():
+
+    rnote_list = ReceivingNoteHeader.query.order_by(
+        ReceivingNoteHeader.rnote_date.desc(),
+        ReceivingNoteHeader.rnote_no.desc()
+    ).all()
+
+    return render_template(
+        "receiving_note.html",
+        rnote_list=rnote_list
+    )    
+
+@masters_bp.route(
+    "/receiving-note/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_receiving_note():
+
+    invoice_list = SalesInvoiceHeader.query.filter_by(
+        status="Pending RNote"
+    ).order_by(
+        SalesInvoiceHeader.invoice_date.desc()
+    ).all()
+
+    if request.method == "POST":
+
+        rnote = ReceivingNoteHeader(
+
+            rnote_no=request.form["rnote_no"],
+
+            rnote_date=date.fromisoformat(
+                request.form["rnote_date"]
+            ),
+
+            sales_invoice_header_id=int(
+                request.form["sales_invoice_header_id"]
+            ),
+
+            customer_id=SalesInvoiceHeader.query.get(
+                int(request.form["sales_invoice_header_id"])
+            ).customer_id,
+
+            received_by=request.form.get(
+                "received_by"
+            ),
+
+            remarks=request.form.get(
+                "remarks"
+            ),
+
+            status="ACTIVE"
+
+        )
+
+        db.session.add(rnote)
+
+        db.session.flush()
+
+        invoice_detail_ids = request.form.getlist(
+            "invoice_detail_id"
+        )
+
+        item_ids = request.form.getlist(
+            "item_id"
+        )
+
+        received_qtys = request.form.getlist(
+            "received_qty"
+        )
+
+        short_qtys = request.form.getlist(
+            "short_qty"
+        )
+
+        rejected_qtys = request.form.getlist(
+            "rejected_qty"
+        )   
+
+        for (
+
+            invoice_detail_id,
+
+            item_id,
+
+            received_qty,
+
+            short_qty,
+
+            rejected_qty
+
+        ) in zip(
+
+            invoice_detail_ids,
+
+            item_ids,
+
+            received_qtys,
+
+            short_qtys,
+
+            rejected_qtys
+
+        ):
+
+            invoice_line = SalesInvoiceDetail.query.get(
+                int(invoice_detail_id)
+            )
+
+            detail = ReceivingNoteDetail(
+
+                receiving_note_header_id=rnote.id,
+
+                sales_invoice_detail_id=int(invoice_detail_id),
+
+                item_id=int(item_id),
+
+                dispatch_qty=invoice_line.dispatch_qty,
+
+                received_qty=float(received_qty),
+
+                short_qty=float(short_qty),
+
+                rejected_qty=float(rejected_qty)
+
+            )
+
+            db.session.add(detail)
+
+        invoice = SalesInvoiceHeader.query.get(
+            rnote.sales_invoice_header_id
+        )
+
+        invoice.status = "Pending Bill Submission"
+
+        db.session.commit()
+
+        return redirect(
+
+            url_for(
+
+                "masters.receiving_note"
+
+            )
+
+        )
+
+    return render_template(
+        "add_receiving_note.html",
+        invoice_list=invoice_list
+    )
+
+@masters_bp.route(
+    "/receiving-note/get-invoice-details/<int:invoice_id>"
+)
+@login_required
+def get_invoice_details(invoice_id):
+
+    invoice = SalesInvoiceHeader.query.get_or_404(invoice_id)
+
+    result = {
+
+        "customer": invoice.customer.customer_name,
+
+        "invoice_no": invoice.invoice_no,
+
+        "invoice_date": invoice.invoice_date.strftime("%d-%m-%Y"),
+
+        "lines": []
+
+    }
+
+    for line in invoice.details:
+
+        result["lines"].append({
+
+            "invoice_detail_id": line.id,
+
+            "item_id": line.item_id,
+
+            "item_name": line.item.item_name,
+
+            "dispatch_qty": line.dispatch_qty
+
+        })
+
+    return jsonify(result)
