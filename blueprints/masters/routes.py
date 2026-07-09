@@ -2903,3 +2903,186 @@ def get_po_details(po_id):
         })
 
     return jsonify(result)
+
+
+
+@masters_bp.route(
+    "/sales-invoice/view/<int:id>"
+)
+@login_required
+def view_sales_invoice(id):
+
+    invoice = SalesInvoiceHeader.query.get_or_404(id)
+
+    return render_template(
+        "view_sales_invoice.html",
+        invoice=invoice
+    )
+
+'''@masters_bp.route(
+    "/sales-invoice/edit/<int:id>",
+    methods=["GET", "POST"]
+)
+@login_required
+def edit_sales_invoice(id):
+
+    invoice = SalesInvoiceHeader.query.get_or_404(id)
+
+    customer_po_list = CustomerPOHeader.query.order_by(
+        CustomerPOHeader.customer_po_no
+    ).all()
+
+    destination_list = DestinationMaster.query.filter_by(
+        active=True
+    ).order_by(
+        DestinationMaster.destination_name
+    ).all()
+
+    transporter_list = TransporterMaster.query.filter_by(
+        active=True
+    ).order_by(
+        TransporterMaster.transporter_name
+    ).all()
+
+    location_list = LocationMaster.query.filter_by(
+        active=True
+    ).order_by(
+        LocationMaster.location_name
+    ).all()
+
+    if request.method == "POST":
+
+        # Save logic will come in next step
+
+        pass
+
+    return render_template(
+
+        "edit_sales_invoice.html",
+
+        invoice=invoice,
+
+        customer_po_list=customer_po_list,
+
+        destination_list=destination_list,
+
+        transporter_list=transporter_list,
+
+        location_list=location_list
+
+    )'''
+
+
+@masters_bp.route(
+    "/sales-invoice/cancel/<int:id>"
+)
+@login_required
+def cancel_sales_invoice(id):
+
+    invoice = SalesInvoiceHeader.query.get_or_404(id)
+
+    if invoice.status == "CANCELLED":
+
+        return redirect(
+            url_for("masters.sales_invoice")
+        )
+
+    #
+    # Reverse inventory
+    #
+
+    for line in invoice.details:
+
+        ledger = InventoryLedger(
+
+            trans_date=date.today(),
+
+            item_id=line.item_id,
+
+            location_id=invoice.location_id,
+
+            qty_in=line.dispatch_qty,
+
+            qty_out=0,
+
+            reference_type="Sales Invoice Cancel",
+
+            reference_id=invoice.id,
+
+            remarks=invoice.invoice_no
+
+        )
+
+        db.session.add(ledger)
+
+        #
+        # Update PO Detail
+        #
+
+        po_line = line.po_detail
+
+        po_line.dispatched_qty -= line.dispatch_qty
+
+        if po_line.dispatched_qty < 0:
+
+            po_line.dispatched_qty = 0
+
+        po_line.pending_qty = (
+            po_line.qty -
+            po_line.dispatched_qty
+        )
+
+        #
+        # Line Status
+        #
+
+        if po_line.dispatched_qty == 0:
+
+            po_line.status = "OPEN"
+
+        elif po_line.pending_qty == 0:
+
+            po_line.status = "CLOSED"
+
+        else:
+
+            po_line.status = "PARTIAL"
+
+    #
+    # Header Status
+    #
+
+    po = invoice.customer_po
+
+    if all(
+        d.pending_qty == d.qty
+        for d in po.details
+    ):
+
+        po.status = "OPEN"
+
+    elif all(
+        d.pending_qty == 0
+        for d in po.details
+    ):
+
+        po.status = "CLOSED"
+
+    else:
+
+        po.status = "PARTIAL"
+
+    #
+    # Invoice Status
+    #
+
+    invoice.status = "CANCELLED"
+
+    db.session.commit()
+
+    return redirect(
+        url_for("masters.sales_invoice")
+    )
+
+
+    

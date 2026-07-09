@@ -119,20 +119,39 @@ Action
 <td>
 
 <a
-href="/sales-invoice/view/{{ invoice.id }}"
+href="{{ url_for('masters.view_sales_invoice', id=invoice.id) }}"
 class="btn btn-info btn-sm">
 
 View
 
 </a>
 
-<a
-href="/sales-invoice/edit/{{ invoice.id }}"
-class="btn btn-warning btn-sm">
+{% if invoice.status=="CANCELLED" %}
 
-Edit
+<span class="badge bg-danger">
 
-</a>
+Cancelled
+
+</span>
+
+{% else %}
+
+<button
+class="btn btn-danger btn-sm"
+
+data-bs-toggle="modal"
+
+data-bs-target="#cancelInvoiceModal"
+
+data-id="{{ invoice.id }}"
+
+data-number="{{ invoice.invoice_no }}">
+
+Cancel
+
+</button>
+
+{% endif %}
 
 </td>
 
@@ -140,10 +159,142 @@ Edit
 
 {% endfor %}
 
+<div class="modal fade"
+
+id="cancelInvoiceModal"
+
+tabindex="-1">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header bg-danger text-white">
+
+<h5 class="modal-title">
+
+Cancel Invoice
+
+</h5>
+
+<button
+
+type="button"
+
+class="btn-close btn-close-white"
+
+data-bs-dismiss="modal">
+
+</button>
+
+</div>
+
+<div class="modal-body">
+
+<p>
+
+Are you sure you want to cancel
+
+<strong id="invoiceNumber"></strong>?
+
+</p>
+
+<div class="alert alert-warning">
+
+<b>This will:</b>
+
+<ul class="mb-0">
+
+<li>Reverse Inventory</li>
+
+<li>Restore Customer PO Pending Qty</li>
+
+<li>Mark Invoice as CANCELLED</li>
+
+</ul>
+
+</div>
+
+<p class="text-danger">
+
+This action cannot be undone.
+
+</p>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+
+class="btn btn-secondary"
+
+data-bs-dismiss="modal">
+
+Close
+
+</button>
+
+<a
+
+id="confirmCancel"
+
+href="#"
+
+class="btn btn-danger">
+
+Cancel Invoice
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
 </tbody>
 
 </table>
 
 </div>
+
+<script>
+
+const cancelModal = document.getElementById(
+    "cancelInvoiceModal"
+);
+
+cancelModal.addEventListener(
+    "show.bs.modal",
+    function(event){
+
+        let button = event.relatedTarget;
+
+        let invoiceId = button.getAttribute(
+            "data-id"
+        );
+
+        let invoiceNo = button.getAttribute(
+            "data-number"
+        );
+
+        document.getElementById(
+            "invoiceNumber"
+        ).innerHTML = invoiceNo;
+
+        document.getElementById(
+            "confirmCancel"
+        ).href =
+        "/sales-invoice/cancel/" + invoiceId;
+
+    }
+);
+
+</script>
+
 
 {% endblock %}

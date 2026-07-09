@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+Sales Invoice
+</h2>
+
+<div class="card">
+
+<div class="card-body">
+
+<p>
+<b>Invoice No :</b>
+{{ invoice.invoice_no }}
+</p>
+
+<p>
+<b>Invoice Date :</b>
+{{ invoice.invoice_date }}
+</p>
+
+<p>
+<b>Customer :</b>
+{{ invoice.customer.customer_name }}
+</p>
+
+<p>
+<b>Customer PO :</b>
+{{ invoice.customer_po.customer_po_no }}
+</p>
+
+<p>
+<b>Destination :</b>
+{{ invoice.destination.destination_name }}
+</p>
+
+<p>
+<b>Transporter :</b>
+{{ invoice.transporter.transporter_name }}
+</p>
+
+<p>
+<b>Location :</b>
+{{ invoice.location.location_name }}
+</p>
+
+<p>
+<b>Vehicle :</b>
+{{ invoice.vehicle_no }}
+</p>
+
+<p>
+<b>LR No :</b>
+{{ invoice.lr_no }}
+</p>
+
+<p>
+<b>E-way Bill :</b>
+{{ invoice.eway_bill_no }}
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Dispatch Qty</th>
+
+<th>Rate</th>
+
+<th>Freight</th>
+
+<th>Basic</th>
+
+<th>GST</th>
+
+<th>Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in invoice.details %}
+
+<tr>
+
+<td>{{ row.item.item_name }}</td>
+
+<td>{{ row.dispatch_qty }}</td>
+
+<td>{{ row.rate }}</td>
+
+<td>{{ row.freight }}</td>
+
+<td>{{ row.basic_amount }}</td>
+
+<td>{{ row.gst_amount }}</td>
+
+<td>{{ row.total_amount }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<a
+href="{{ url_for('masters.sales_invoice') }}"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+
+
+</div>
+
+{% endblock %}
