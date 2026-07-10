@@ -39,6 +39,9 @@ from models import SalesInvoiceHeader
 from models import SalesInvoiceDetail
 from models import ReceivingNoteHeader
 from models import ReceivingNoteDetail
+from models import BillSubmissionHeader
+from models import BillSubmissionDetail
+
 
 masters_bp = Blueprint(
     "masters",
@@ -3273,5 +3276,297 @@ def get_invoice_details(invoice_id):
             "dispatch_qty": line.dispatch_qty
 
         })
+
+    return jsonify(result)
+
+
+@masters_bp.route(
+    "/receiving-note/cancel/<int:id>"
+)
+@login_required
+def cancel_receiving_note(id):
+
+    rnote = ReceivingNoteHeader.query.get_or_404(id)
+
+    if rnote.status == "CANCELLED":
+
+        return redirect(
+
+            url_for(
+                "masters.receiving_note"
+            )
+
+        )
+
+    rnote.status = "CANCELLED"
+
+    invoice = SalesInvoiceHeader.query.get(
+
+        rnote.sales_invoice_header_id
+
+    )
+
+    invoice.status = "Pending RNote"
+
+    db.session.commit()
+
+    return redirect(
+
+        url_for(
+            "masters.receiving_note"
+        )
+
+    )
+
+@masters_bp.route(
+    "/receiving-note/view/<int:id>"
+)
+@login_required
+def view_receiving_note(id):
+
+    rnote = ReceivingNoteHeader.query.get_or_404(id)
+
+    return render_template(
+
+        "view_receiving_note.html",
+
+        rnote=rnote
+
+    )
+
+@masters_bp.route("/bill-submission")
+@login_required
+def bill_submission():
+
+    bill_list = BillSubmissionHeader.query.order_by(
+        BillSubmissionHeader.bill_submission_date.desc(),
+        BillSubmissionHeader.bill_submission_no.desc()
+    ).all()
+
+    return render_template(
+        "bill_submission.html",
+        bill_list=bill_list
+    )
+
+
+@masters_bp.route(
+    "/bill-submission/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_bill_submission():
+
+    rnote_list = ReceivingNoteHeader.query.filter_by(
+        status="ACTIVE"
+    ).join(
+        SalesInvoiceHeader
+    ).filter(
+        SalesInvoiceHeader.status == "Pending Bill Submission"
+    ).order_by(
+        ReceivingNoteHeader.rnote_date.desc()
+    ).all()
+
+    if request.method == "POST":
+
+        # Save logic later
+
+        rnote = ReceivingNoteHeader.query.get(
+
+        request.form["receiving_note_header_id"]
+
+        )
+
+        bill = BillSubmissionHeader(
+
+        bill_submission_no=request.form[
+            "bill_submission_no"
+        ],
+
+        bill_submission_date=date.fromisoformat(
+
+            request.form[
+                "bill_submission_date"
+            ]
+
+        ),
+
+        receiving_note_header_id=request.form[
+            "receiving_note_header_id"
+        ],
+
+        sales_invoice_header_id=rnote.sales_invoice_header_id,
+
+        customer_id=rnote.customer_id,
+
+        drr_no=request.form[
+            "drr_no"
+        ],
+
+        ro_no=request.form[
+            "ro_no"
+        ],
+
+        ro_date=(
+
+            date.fromisoformat(
+                request.form["ro_date"]
+            )
+
+            if request.form["ro_date"]
+
+            else None
+
+        ),
+
+        remarks=request.form[
+            "remarks"
+        ],
+
+        status="OPEN"
+
+    )
+
+        db.session.add(bill)
+
+        db.session.flush()
+
+        grand_total = 0
+
+        for row in rnote.details:
+
+            invoice_line = row.invoice_detail
+
+            basic = (
+
+                invoice_line.rate +
+
+                invoice_line.freight
+
+            ) * row.received_qty
+
+            gst = basic * invoice_line.gst_rate / 100
+
+            total = basic + gst
+
+            grand_total += total
+
+            detail = BillSubmissionDetail(
+
+                bill_submission_header_id=bill.id,
+
+                receiving_note_detail_id=row.id,
+
+                item_id=row.item_id,
+
+                received_qty=row.received_qty,
+
+                rate=invoice_line.rate,
+
+                freight=invoice_line.freight,
+
+                basic_amount=basic,
+
+                gst_amount=gst,
+
+                total_amount=total
+
+            )
+
+        db.session.add(detail)
+
+        bill.bill_amount = grand_total
+
+        invoice = rnote.invoice
+
+        invoice.status = "Bill Submitted"
+
+        rnote.status = "Bill Submitted"
+
+        db.session.commit()
+
+        return redirect(
+
+            url_for(
+
+                "masters.bill_submission"
+
+            )
+
+        )
+
+    return render_template(
+
+        "add_bill_submission.html",
+
+        rnote_list=rnote_list
+
+    )
+
+@masters_bp.route(
+    "/bill-submission/get-rnote-details/<int:rnote_id>"
+)
+@login_required
+def get_rnote_details(rnote_id):
+
+    rnote = ReceivingNoteHeader.query.get_or_404(rnote_id)
+
+    result = {
+
+        "customer": rnote.customer.customer_name,
+
+        "invoice_no": rnote.invoice.invoice_no,
+
+        "invoice_date": rnote.invoice.invoice_date.strftime("%d-%m-%Y"),
+
+        "lines": []
+
+    }
+
+    total_received_qty = 0
+    total_basic = 0
+    total_gst = 0
+    total_amount = 0
+
+    for line in rnote.details:
+
+        invoice_line = line.invoice_detail
+
+        basic = (
+            invoice_line.rate +
+            invoice_line.freight
+        ) * line.received_qty
+
+        gst = basic * invoice_line.gst_rate / 100
+
+        total = basic + gst
+
+        total_basic += basic
+        total_gst += gst
+        total_amount += total
+        total_received_qty += line.received_qty
+
+        result["lines"].append({
+
+            "item_name": line.item.item_name,
+
+            "received_qty": line.received_qty,
+
+            "rate": invoice_line.rate,
+
+            "freight": invoice_line.freight,
+
+            "basic_amount": basic,
+
+            "gst_amount": gst,
+
+            "total_amount": total
+
+
+        })
+
+    result["total_received_qty"] = total_received_qty
+    result["total_basic"] = total_basic
+    result["total_gst"] = total_gst
+    result["grand_total"] = total_amount
 
     return jsonify(result)

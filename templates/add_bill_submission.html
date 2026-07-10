@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+Add Bill Submission
+
+</h2>
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>
+
+Bill Submission No
+
+</label>
+
+<input
+type="text"
+name="bill_submission_no"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Submission Date
+
+</label>
+
+<input
+type="date"
+name="bill_submission_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-6">
+
+<label>
+
+Receiving Note
+
+</label>
+
+<select
+id="rnote"
+name="receiving_note_header_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Receiving Note
+
+</option>
+
+{% for rnote in rnote_list %}
+
+<option value="{{ rnote.id }}">
+
+{{ rnote.rnote_no }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>
+
+Customer
+
+</label>
+
+<input
+id="customer"
+class="form-control"
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Invoice
+
+</label>
+
+<input
+id="invoice"
+class="form-control"
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Invoice Date
+
+</label>
+
+<input
+id="invoice_date"
+class="form-control"
+readonly>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>
+
+DRR No
+
+</label>
+
+<input
+type="text"
+name="drr_no"
+class="form-control">
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+RO No
+
+</label>
+
+<input
+type="text"
+name="ro_no"
+class="form-control">
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+RO Date
+
+</label>
+
+<input
+type="date"
+name="ro_date"
+class="form-control">
+
+</div>
+
+</div>
+
+<hr>
+
+<h5>
+
+Items
+
+</h5>
+
+<table
+class="table table-bordered"
+id="bill-items">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Received Qty</th>
+
+<th>Rate</th>
+
+<th>Freight</th>
+
+<th>Basic</th>
+
+<th>GST</th>
+
+<th>Total</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="bill-lines">
+
+</tbody>
+
+<tfoot>
+
+<tr class="table-secondary fw-bold">
+
+<td>
+
+TOTAL
+
+</td>
+
+<td id="total_received" class="text-end">
+
+0.00
+
+</td>
+
+<td>
+
+</td>
+
+<td>
+
+</td>
+
+<td id="total_basic" class="text-end">
+
+0.00
+
+</td>
+
+<td id="total_gst" class="text-end">
+
+0.00
+
+</td>
+
+<td id="grand_total" class="text-end">
+
+0.00
+
+</td>
+
+</tr>
+
+</tfoot>
+
+</table>
+
+<div class="mb-3">
+
+<label>
+
+Remarks
+
+</label>
+
+<textarea
+name="remarks"
+class="form-control"></textarea>
+
+</div>
+
+<button
+class="btn btn-success">
+
+Save
+
+</button>
+
+<a
+href="/bill-submission"
+class="btn btn-secondary">
+
+Cancel
+
+</a>
+
+</form>
+
+</div>
+
+<script>
+
+$(function(){
+
+    $("#rnote").change(function(){
+
+        let rnote=$(this).val();
+
+        if(rnote=="")
+            return;
+
+        $.get(
+
+            "/bill-submission/get-rnote-details/"+rnote,
+
+            function(data){
+
+                $("#customer").val(data.customer);
+
+                $("#invoice").val(data.invoice_no);
+
+                $("#invoice_date").val(data.invoice_date);
+
+                let tbody=$("#bill-lines");
+
+                tbody.empty();
+
+                console.log(data);
+
+                console.log(data.lines);
+
+                data.lines.forEach(function(line){
+
+                    tbody.append(`
+
+<tr>
+
+<td>${line.item_name}</td>
+
+<td class="text-end">
+${line.received_qty}
+</td>
+
+<td class="text-end">
+${line.rate.toFixed(2)}
+</td>
+
+<td class="text-end">
+${line.freight.toFixed(2)}
+</td>
+
+<td class="text-end">
+${line.basic_amount.toFixed(2)}
+</td>
+
+<td class="text-end">
+${line.gst_amount.toFixed(2)}
+</td>
+
+<td class="text-end">
+${line.total_amount.toFixed(2)}
+</td>
+
+</tr>
+
+`);
+
+                });
+
+                $("#total_received").text(
+                    data.total_received_qty.toFixed(2)
+                );
+
+                $("#total_basic").text(
+                    data.total_basic.toFixed(2)
+                );
+
+                $("#total_gst").text(
+                    data.total_gst.toFixed(2)
+                );
+
+                $("#grand_total").text(
+                    data.grand_total.toFixed(2)
+                );
+
+            }
+
+        );
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

@@ -59,11 +59,42 @@ Add Receiving Note
 <td>
 
 <a
+
+href="{{ url_for('masters.view_receiving_note',id=rnote.id) }}"
+
 class="btn btn-info btn-sm">
 
 View
 
 </a>
+
+{% if rnote.status=="ACTIVE" %}
+
+<button
+
+class="btn btn-danger btn-sm"
+
+data-bs-toggle="modal"
+
+data-bs-target="#cancelRNoteModal"
+
+data-id="{{ rnote.id }}"
+
+data-number="{{ rnote.rnote_no }}">
+
+Cancel
+
+</button>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Cancelled
+
+</span>
+
+{% endif %}
 
 </td>
 
@@ -75,6 +106,136 @@ View
 
 </table>
 
+<div class="modal fade"
+
+id="cancelRNoteModal"
+
+tabindex="-1">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header bg-danger text-white">
+
+<h5 class="modal-title">
+
+Cancel Receiving Note
+
+</h5>
+
+<button
+
+type="button"
+
+class="btn-close btn-close-white"
+
+data-bs-dismiss="modal">
+
+</button>
+
 </div>
+
+<div class="modal-body">
+
+<p>
+
+Are you sure you want to cancel
+
+<strong id="rnoteNumber"></strong> ?
+
+</p>
+
+<div class="alert alert-warning">
+
+<b>This will</b>
+
+<ul>
+
+<li>Unlock the Sales Invoice</li>
+
+<li>Restore Invoice Status to Pending RNote</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+
+class="btn btn-secondary"
+
+data-bs-dismiss="modal">
+
+Close
+
+</button>
+
+<a
+
+id="confirmCancel"
+
+href="#"
+
+class="btn btn-danger">
+
+Cancel Receiving Note
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+<script>
+
+const cancelModal=document.getElementById(
+
+"cancelRNoteModal"
+
+);
+
+cancelModal.addEventListener(
+
+"show.bs.modal",
+
+function(event){
+
+let button=event.relatedTarget;
+
+let id=button.getAttribute("data-id");
+
+let number=button.getAttribute("data-number");
+
+document.getElementById(
+
+"rnoteNumber"
+
+).innerHTML=number;
+
+document.getElementById(
+
+"confirmCancel"
+
+).href=
+
+"/receiving-note/cancel/"+id;
+
+}
+
+);
+
+</script>
+
 
 {% endblock %}

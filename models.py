@@ -1319,3 +1319,153 @@ class ReceivingNoteDetail(db.Model):
     item = db.relationship("ItemMaster")
 
     invoice_detail = db.relationship("SalesInvoiceDetail")
+
+class BillSubmissionHeader(db.Model):
+
+    __tablename__ = "bill_submission_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    bill_submission_no = db.Column(
+        db.String(50),
+        unique=True,
+        nullable=False
+    )
+
+    bill_submission_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    receiving_note_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("receiving_note_header.id"),
+        nullable=False
+    )
+
+    sales_invoice_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_invoice_header.id"),
+        nullable=False
+    )
+
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_master.id"),
+        nullable=False
+    )
+
+    drr_no = db.Column(
+        db.String(100)
+    )
+
+    ro_no = db.Column(
+        db.String(100)
+    )
+
+    ro_date = db.Column(
+        db.Date
+    )
+
+    bill_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    status = db.Column(
+        db.String(30),
+        default="ACTIVE"
+    )
+
+    customer = db.relationship(
+        "CustomerMaster"
+    )
+
+    invoice = db.relationship(
+        "SalesInvoiceHeader"
+    )
+
+    receiving_note = db.relationship(
+        "ReceivingNoteHeader"
+    )
+
+    details = db.relationship(
+
+        "BillSubmissionDetail",
+
+        backref="bill_submission",
+
+        cascade="all, delete-orphan"
+
+    )
+
+class BillSubmissionDetail(db.Model):
+
+    __tablename__ = "bill_submission_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    bill_submission_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("bill_submission_header.id"),
+        nullable=False
+    )
+
+    receiving_note_detail_id = db.Column(
+        db.Integer,
+        db.ForeignKey("receiving_note_detail.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    received_qty = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    rate = db.Column(
+        db.Float
+    )
+
+    freight = db.Column(
+        db.Float
+    )
+
+    gst_rate = db.Column(
+        db.Float
+    )
+
+    basic_amount = db.Column(
+        db.Float
+    )
+
+    gst_amount = db.Column(
+        db.Float
+    )
+
+    total_amount = db.Column(
+        db.Float
+    )
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+
+    rnote_detail = db.relationship(
+        "ReceivingNoteDetail"
+    )

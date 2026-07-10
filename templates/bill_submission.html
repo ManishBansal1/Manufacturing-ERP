@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<h2>
+
+Bill Submission
+
+</h2>
+
+<a
+href="/bill-submission/add"
+class="btn btn-success">
+
+Add Bill Submission
+
+</a>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>Bill Submission No</th>
+
+<th>Date</th>
+
+<th>Invoice</th>
+
+<th>Customer</th>
+
+<th>DRR No</th>
+
+<th>RO No</th>
+
+<th class="text-end">
+    Bill Amount
+</th>
+
+<th>Status</th>
+
+<th width="180">
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for bill in bill_list %}
+
+<tr>
+
+<td>{{ bill.bill_submission_no }}</td>
+
+<td>{{ bill.bill_submission_date.strftime("%d-%m-%Y") }}</td>
+
+<td>{{ bill.invoice.invoice_no }}</td>
+
+<td>{{ bill.customer.customer_name }}</td>
+
+<td>{{ bill.drr_no }}</td>
+
+
+
+<td>{{ bill.ro_no }}</td>
+
+<td class="text-end fw-bold">
+    ₹ {{ "{:,.2f}".format(bill.bill_amount or 0) }}
+</td>
+
+<td>{{ bill.status }}</td>
+
+<td>
+
+<a
+href="#"
+class="btn btn-info btn-sm">
+
+View
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<h2>
+
+Receiving Note Details
+
+</h2>
+
+<a
+href="{{ url_for('masters.receiving_note') }}"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+<div class="card mb-4">
+
+<div class="card-header bg-primary text-white">
+
+Header Information
+
+</div>
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-3 mb-3">
+
+<label><b>RNote No</b></label>
+
+<input
+class="form-control"
+value="{{ rnote.rnote_no }}"
+readonly>
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label><b>Date</b></label>
+
+<input
+class="form-control"
+value="{{ rnote.rnote_date.strftime('%d-%m-%Y') }}"
+readonly>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label><b>Sales Invoice</b></label>
+
+<input
+class="form-control"
+value="{{ rnote.invoice.invoice_no }}"
+readonly>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label><b>Customer</b></label>
+
+<input
+class="form-control"
+value="{{ rnote.customer.customer_name }}"
+readonly>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label><b>Status</b></label>
+
+<input
+class="form-control"
+value="{{ rnote.status }}"
+readonly>
+
+</div>
+
+<div class="col-md-12 mb-3">
+
+<label><b>Remarks</b></label>
+
+<textarea
+class="form-control"
+rows="2"
+readonly>{{ rnote.remarks }}</textarea>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-header bg-success text-white">
+
+Items
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Dispatch Qty</th>
+
+<th>Received Qty</th>
+
+<th>Short Qty</th>
+
+<th>Rejected Qty</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in rnote.details %}
+
+<tr>
+
+<td>
+
+{{ row.item.item_name }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.dispatch_qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.received_qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.short_qty) }}
+
+</td>
+
+<td>
+
+{{ "%.2f"|format(row.rejected_qty) }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
