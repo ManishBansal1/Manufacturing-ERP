@@ -92,6 +92,33 @@ View
 
 </a>
 
+{% if bill.status == "CANCELLED" %}
+
+<span class="badge bg-danger">
+
+Cancelled
+
+</span>
+
+{% else %}
+
+<button
+class="btn btn-danger btn-sm"
+
+data-bs-toggle="modal"
+
+data-bs-target="#cancelBillModal"
+
+data-id="{{ bill.id }}"
+
+data-number="{{ bill.bill_submission_no }}">
+
+Cancel
+
+</button>
+
+{% endif %}
+
 </td>
 
 </tr>
@@ -102,6 +129,128 @@ View
 
 </table>
 
+<div
+class="modal fade"
+id="cancelBillModal"
+tabindex="-1">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header bg-danger text-white">
+
+<h5 class="modal-title">
+
+Cancel Bill Submission
+
+</h5>
+
+<button
+type="button"
+class="btn-close btn-close-white"
+data-bs-dismiss="modal">
+
+</button>
+
 </div>
+
+<div class="modal-body">
+
+<p>
+
+Are you sure you want to cancel
+
+<strong id="billNumber"></strong> ?
+
+</p>
+
+<div class="alert alert-warning">
+
+<b>This will:</b>
+
+<ul class="mb-0">
+
+<li>Re-open Receiving Note</li>
+
+<li>Restore Invoice status</li>
+
+<li>Allow Bill Submission again</li>
+
+</ul>
+
+</div>
+
+<p class="text-danger">
+
+This action cannot be undone.
+
+</p>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+class="btn btn-secondary"
+data-bs-dismiss="modal">
+
+Close
+
+</button>
+
+<a
+id="confirmCancelBill"
+href="#"
+class="btn btn-danger">
+
+Cancel Bill
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+<script>
+
+const billModal = document.getElementById(
+    "cancelBillModal"
+);
+
+billModal.addEventListener(
+
+    "show.bs.modal",
+
+    function(event){
+
+        let button = event.relatedTarget;
+
+        let id = button.getAttribute("data-id");
+
+        let number = button.getAttribute("data-number");
+
+        document.getElementById(
+            "billNumber"
+        ).innerHTML = number;
+
+        document.getElementById(
+            "confirmCancelBill"
+        ).href =
+        "/bill-submission/cancel/" + id;
+
+    }
+
+);
+
+</script>
+
 
 {% endblock %}

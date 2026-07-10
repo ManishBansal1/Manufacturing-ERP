@@ -10,6 +10,8 @@ from flask import jsonify
 
 from sqlalchemy import func
 
+from flask import flash
+
 from datetime import date
 
 from models import db
@@ -3584,5 +3586,56 @@ def view_bill_submission(id):
         "view_bill_submission.html",
 
         bill=bill
+
+    )
+
+@masters_bp.route(
+    "/bill-submission/cancel/<int:id>"
+)
+@login_required
+def cancel_bill_submission(id):
+
+    bill = BillSubmissionHeader.query.get_or_404(id)
+
+    if bill.status == "CANCELLED":
+
+        flash(
+            "Bill already cancelled.",
+            "warning"
+        )
+
+        return redirect(
+
+            url_for(
+                "masters.bill_submission"
+            )
+
+        )
+
+    bill.status = "CANCELLED"
+
+    rnote = bill.receiving_note
+
+    invoice = bill.invoice
+
+    rnote.status = "ACTIVE"
+
+    invoice.status = "Pending Bill Submission"
+
+    db.session.commit()
+
+    flash(
+
+        "Bill Submission cancelled successfully.",
+
+        "success"
+
+    )
+
+    return redirect(
+
+        url_for(
+            "masters.bill_submission"
+        )
 
     )
