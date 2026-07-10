@@ -3472,7 +3472,7 @@ def add_bill_submission():
 
             )
 
-        db.session.add(detail)
+            db.session.add(detail)
 
         bill.bill_amount = grand_total
 
@@ -3570,3 +3570,19 @@ def get_rnote_details(rnote_id):
     result["grand_total"] = total_amount
 
     return jsonify(result)
+
+@masters_bp.route(
+    "/bill-submission/view/<int:id>"
+)
+@login_required
+def view_bill_submission(id):
+
+    bill = BillSubmissionHeader.query.get_or_404(id)
+
+    return render_template(
+
+        "view_bill_submission.html",
+
+        bill=bill
+
+    )

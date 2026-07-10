@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+Bill Submission
+
+</h2>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>Bill Submission No</label>
+
+<input
+class="form-control"
+value="{{ bill.bill_submission_no }}"
+readonly>
+
+</div>
+
+<div class="col-md-3">
+
+<label>Submission Date</label>
+
+<input
+class="form-control"
+value="{{ bill.bill_submission_date.strftime('%d-%m-%Y') }}"
+readonly>
+
+</div>
+
+<div class="col-md-3">
+
+<label>DRR No</label>
+
+<input
+class="form-control"
+value="{{ bill.drr_no }}"
+readonly>
+
+</div>
+
+<div class="col-md-3">
+
+<label>RO No</label>
+
+<input
+class="form-control"
+value="{{ bill.ro_no }}"
+readonly>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>Customer</label>
+
+<input
+class="form-control"
+value="{{ bill.customer.customer_name }}"
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>Invoice</label>
+
+<input
+class="form-control"
+value="{{ bill.invoice.invoice_no }}"
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>Receiving Note</label>
+
+<input
+class="form-control"
+value="{{ bill.receiving_note.rnote_no }}"
+readonly>
+
+</div>
+
+</div>
+
+<br>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th class="text-end">Received Qty</th>
+
+<th class="text-end">Rate</th>
+
+<th class="text-end">Freight</th>
+
+<th class="text-end">Basic</th>
+
+<th class="text-end">GST</th>
+
+<th class="text-end">Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% set ns = namespace(
+qty=0,
+basic=0,
+gst=0,
+total=0
+) %}
+
+{% for row in bill.details %}
+
+{% set ns.qty = ns.qty + row.received_qty %}
+{% set ns.basic = ns.basic + row.basic_amount %}
+{% set ns.gst = ns.gst + row.gst_amount %}
+{% set ns.total = ns.total + row.total_amount %}
+
+<tr>
+
+<td>
+
+{{ row.item.item_name }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.received_qty) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.rate) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.freight) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.basic_amount) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.gst_amount) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.total_amount) }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+<tfoot>
+
+<tr class="table-secondary fw-bold">
+
+<td>
+
+TOTAL
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(ns.qty) }}
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(ns.basic) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(ns.gst) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(ns.total) }}
+
+</td>
+
+</tr>
+
+</tfoot>
+
+</table>
+
+<div class="mt-3">
+
+<a
+href="{{ url_for('masters.bill_submission') }}"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+</div>
+
+{% endblock %}
