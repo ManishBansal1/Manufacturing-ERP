@@ -17,6 +17,8 @@ Receivables Dashboard
 
 <div class="card shadow-sm mb-4">
 
+<form method="GET">
+
 <div class="card-body">
 
 <div class="row">
@@ -31,13 +33,14 @@ Financial Year
 
 <select
 class="form-select"
-name="financial_year">
+name="financial_year"
+onchange="this.form.submit()">
 
 {% for fy in financial_years %}
 
 <option
 value="{{ fy }}"
-{% if fy==current_fy %}selected{% endif %}>
+{% if fy==selected_fy %}selected{% endif %}>
 
 FY {{ fy }}
 
@@ -58,8 +61,17 @@ From Date
 </label>
 
 <input
+
 type="date"
-class="form-control">
+
+class="form-control"
+
+name="from_date"
+
+value="{{ from_date if from_date else '' }}"
+
+onchange="this.form.submit()">
+
 
 </div>
 
@@ -72,8 +84,17 @@ To Date
 </label>
 
 <input
+
 type="date"
-class="form-control">
+
+class="form-control"
+
+name="to_date"
+
+value="{{ to_date if to_date else '' }}"
+
+onchange="this.form.submit()">
+
 
 </div>
 
@@ -86,42 +107,45 @@ Invoice Status
 </label>
 
 <select
-class="form-select"
-name="invoice_status">
 
-<option value="ALL">
+class="form-select"
+
+name="invoice_status"
+
+onchange="this.form.submit()">
+
+<option value="ALL"
+{% if invoice_status=="ALL" or not invoice_status %}selected{% endif %}>
 
 All
 
 </option>
 
-<option value="Pending RNote">
+<option value="Pending RNote"
+{% if invoice_status=="Pending RNote" %}selected{% endif %}>
 
 Pending RNote
 
 </option>
 
-<option value="Pending Bill Submission">
+<option value="Pending Bill Submission"
+{% if invoice_status=="Pending Bill Submission" %}selected{% endif %}>
 
 Pending Bill Submission
 
 </option>
 
-<option value="Bill Submitted" selected>
+<option value="Bill Submitted"
+{% if invoice_status=="Bill Submitted" %}selected{% endif %}>
 
 Bill Submitted
 
 </option>
 
-<option value="Payment Received">
+<option value="Payment Received"
+{% if invoice_status=="Payment Received" %}selected{% endif %}>
 
 Payment Received
-
-</option>
-
-<option value="CANCELLED">
-
-Cancelled
 
 </option>
 
@@ -133,50 +157,96 @@ Cancelled
 
 <label>
 
-Bill Status
+Item Name
 
 </label>
 
-<select
+<!--<select
+
 class="form-select"
-name="bill_status">
+
+name="item_name"
+
+onchange="this.form.submit()">-->
+
+<select
+id="item_name"
+class="form-select"
+name="item_name">
 
 <option value="ALL">
 
-All
+All Items
 
 </option>
 
-<option value="OPEN" selected>
+{% for item in item_list %}
 
-Open
+<option
+
+value="{{ item.item_name }}"
+
+{% if item_name==item.item_name %}selected{% endif %}>
+
+{{ item.item_name }}
 
 </option>
 
-<option value="PAYMENT RECEIVED">
-
-Payment Received
-
-</option>
+{% endfor %}
 
 </select>
 
 </div>
 
-<div class="col-md-2 d-flex align-items-end">
+<div class="col-md-2">
 
-<button
-class="btn btn-primary w-100">
+<label>
 
-Apply Filters
+Customer
 
-</button>
+</label>
+
+<select
+
+class="form-select"
+
+name="customer_name"
+
+onchange="this.form.submit()">
+
+<option value="ALL">
+
+All Customers
+
+</option>
+
+{% for customer in customer_list %}
+
+<option
+
+value="{{ customer.customer_name }}"
+
+{% if customer_name==customer.customer_name %}
+
+selected
+
+{% endif %}>
+
+{{ customer.customer_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
 
 </div>
 
 </div>
 
 </div>
+
+</form>
 
 </div>
 
@@ -198,7 +268,7 @@ Outstanding Amount
 
 <h3>
 
-₹0.00
+₹ {{ "{:,.2f}".format(summary.outstanding_amount) }}
 
 </h3>
 
@@ -222,7 +292,7 @@ Bills Pending
 
 <h3>
 
-0
+{{ summary.pending_bills }}
 
 </h3>
 
@@ -246,7 +316,8 @@ Average Collection Days
 
 <h3>
 
-0
+{{ summary.average_collection_days }}
+Days
 
 </h3>
 
@@ -270,7 +341,8 @@ Oldest Outstanding
 
 <h3>
 
-0 Days
+{{ summary.oldest_outstanding }}
+Days
 
 </h3>
 
@@ -307,29 +379,29 @@ class="table table-bordered table-striped table-sm">
 
 <th>Customer PO</th>
 
-<th>Item</th>
+<th style="min-width: 250px;">Item</th>
 
-<th>Customer</th>
+<th style="min-width: 250px;">Customer</th>
 
 <th>Destination</th>
 
 <th>Dispatch Qty</th>
 
-<th>Dispatch Date</th>
+<th style="min-width: 80px;">Dispatch Date</th>
 
 <th>RNote Qty</th>
 
-<th>RNote Date</th>
+<th style="min-width: 80px;">RNote Date</th>
 
 <th>Invoice No</th>
 
-<th>Invoice Date</th>
+<th style="min-width: 80px;">Invoice Date</th>
 
-<th>Bill Date</th>
+<th style="min-width: 80px;">Bill Date</th>
 
 <th>Bill Amount</th>
 
-<th>Payment Date</th>
+<th style="min-width: 80px;">Payment Date</th>
 
 <th>Payment Received</th>
 
@@ -345,7 +417,7 @@ class="table table-bordered table-striped table-sm">
 
 <th>Collection Days</th>
 
-<th>Invoice Status</th>
+<th style="min-width: 160px;">Invoice Status</th>
 
 <th>Payment Status</th>
 
@@ -461,9 +533,19 @@ class="table table-bordered table-striped table-sm">
 
 </td>
 
-<td></td>
+<td class="text-end">
 
-<td></td>
+{{ "{:,.2f}".format(row["pending_amount"]) }}
+
+</td>
+
+<td class="text-center">
+
+{{ row["collection_days"] }}
+
+</td>
+
+
 
 <td>{{ row.invoice_status }}</td>
 
@@ -477,6 +559,94 @@ class="table table-bordered table-striped table-sm">
 
 </tbody>
 
+<tfoot>
+
+<tr class="table-dark">
+
+<th colspan="4">
+
+Grand Total
+
+</th>
+
+<th class="text-end">
+
+{{ grand_totals.dispatch_qty }}
+
+</th>
+
+<th></th>
+
+<th class="text-end">
+
+{{ grand_totals.received_qty }}
+
+</th>
+
+<th></th>
+
+<th></th>
+
+<th></th>
+
+<th></th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.bill_amount) }}
+
+</th>
+
+<th></th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.amount_received) }}
+
+</th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.tds) }}
+
+</th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.ld) }}
+
+</th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.general_damage) }}
+
+</th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.other_deductions) }}
+
+</th>
+
+<th class="text-end">
+
+{{ "{:,.2f}".format(grand_totals.pending_amount) }}
+
+</th>
+
+<th></th>
+
+<th></th>
+
+<th></th>
+
+<th></th>
+
+</tr>
+
+</tfoot>
+
 </table>
 
 </div>
@@ -486,5 +656,90 @@ class="table table-bordered table-striped table-sm">
 </div>
 
 </div>
+
+<script>
+
+new TomSelect("#item_name",{
+
+    create:false,
+
+    sortField:{
+        field:"text",
+        direction:"asc"
+    },
+
+    onChange:function(){
+
+        this.input.closest("form").submit();
+
+    }
+
+});
+
+</script>
+
+<script>
+
+$(document).ready(function(){
+
+$('#receivableTable').DataTable({
+
+    autoWidth:false,
+
+scrollX:true,
+
+scrollY:"500px",
+
+scrollCollapse:false,
+
+paging:true,
+
+pageLength:25,
+
+lengthMenu:[
+
+[10,25,50,100,-1],
+
+[10,25,50,100,"All"]
+
+],
+
+fixedHeader:true,
+
+fixedColumns:{
+
+left:0
+
+},
+
+
+stateSave:true,
+
+order:[[8,"desc"]],
+
+dom:'Blfrtip',
+
+buttons:[
+
+'copy',
+
+'csv',
+
+'excel',
+
+'pdf',
+
+'print',
+
+'colvis'
+
+]
+
+});
+
+});
+
+</script>
+
 
 {% endblock %}
