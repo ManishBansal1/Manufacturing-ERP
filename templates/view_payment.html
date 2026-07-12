@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+View Payment
+
+</h2>
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>Payment No</b><br>
+
+{{ payment.payment_no }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Payment Date</b><br>
+
+{{ payment.payment_date.strftime("%d-%m-%Y") }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Customer</b><br>
+
+{{ payment.customer.customer_name }}
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>Invoice</b><br>
+
+{{ payment.invoice.invoice_no }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Bill Submission</b><br>
+
+{{ payment.bill_submission.bill_submission_no }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Bill Amount</b><br>
+
+{{ "{:,.2f}".format(payment.bill_amount) }}
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<b>Received</b><br>
+
+{{ "{:,.2f}".format(payment.amount_received) }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>TDS</b><br>
+
+{{ "{:,.2f}".format(payment.tds_deducted) }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>LD</b><br>
+
+{{ "{:,.2f}".format(payment.ld_charges) }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Other</b><br>
+
+{{ "{:,.2f}".format(payment.other_deductions) }}
+
+</div>
+
+</div>
+
+<hr>
+
+<h5>
+
+Bill Details
+
+</h5>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Qty</th>
+
+<th>Rate</th>
+
+<th>Basic</th>
+
+<th>GST</th>
+
+<th>Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for line in payment.bill_submission.details %}
+
+<tr>
+
+<td>{{ line.item.item_name }}</td>
+
+<td class="text-end">{{ line.received_qty }}</td>
+
+<td class="text-end">{{ "{:,.2f}".format(line.rate) }}</td>
+
+<td class="text-end">{{ "{:,.2f}".format(line.basic_amount) }}</td>
+
+<td class="text-end">{{ "{:,.2f}".format(line.gst_amount) }}</td>
+
+<td class="text-end">{{ "{:,.2f}".format(line.total_amount) }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<a
+href="/payment"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

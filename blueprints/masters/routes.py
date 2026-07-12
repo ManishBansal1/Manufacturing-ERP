@@ -43,7 +43,7 @@ from models import ReceivingNoteHeader
 from models import ReceivingNoteDetail
 from models import BillSubmissionHeader
 from models import BillSubmissionDetail
-
+from models import PaymentReceiptHeader
 
 masters_bp = Blueprint(
     "masters",
@@ -3637,5 +3637,200 @@ def cancel_bill_submission(id):
         url_for(
             "masters.bill_submission"
         )
+
+    )
+
+######################################################
+# PAYMENT
+######################################################
+
+@masters_bp.route("/payment")
+@login_required
+def payment():
+
+    payment_list = PaymentReceiptHeader.query.order_by(
+
+        PaymentReceiptHeader.payment_date.desc(),
+
+        PaymentReceiptHeader.payment_no.desc()
+
+    ).all()
+
+    return render_template(
+
+        "payment.html",
+
+        payment_list=payment_list
+
+    )
+
+
+@masters_bp.route(
+    "/payment/add",
+    methods=["GET", "POST"]
+)
+@login_required
+def add_payment():
+
+    bill_list = BillSubmissionHeader.query.filter_by(
+
+        status="OPEN"
+
+    ).order_by(
+
+        BillSubmissionHeader.bill_submission_date.desc()
+
+    ).all()
+
+    if request.method == "POST":
+
+        bill = BillSubmissionHeader.query.get_or_404(
+
+            request.form["bill_submission_header_id"]
+
+        )
+
+        payment = PaymentReceiptHeader(
+
+            payment_no=request.form["payment_no"],
+
+            payment_date=date.fromisoformat(
+
+                request.form["payment_date"]
+
+            ),
+
+            bill_submission_header_id=bill.id,
+
+            sales_invoice_header_id=bill.sales_invoice_header_id,
+
+            customer_id=bill.customer_id,
+
+            bill_amount=bill.bill_amount,
+
+            amount_received=float(
+                request.form["amount_received"]
+            ),
+
+            tds_deducted=float(
+                request.form["tds_deducted"]
+            ),
+
+            ld_charges=float(
+                request.form["ld_charges"]
+            ),
+
+            general_damage_charges=float(
+                request.form["general_damage_charges"]
+            ),
+
+            other_deductions=float(
+                request.form["other_deductions"]
+            ),
+
+            #payment_mode=request.form["payment_mode"],
+
+            #bank_name=request.form["bank_name"],
+
+            #utr_no=request.form["utr_no"],
+
+            remarks=request.form["remarks"],
+
+            status="ACTIVE"
+
+        )
+
+        db.session.add(payment)
+
+        bill.status = "PAYMENT RECEIVED"
+
+        invoice = bill.invoice
+
+        invoice.status = "Payment Received"
+
+        db.session.commit()
+
+        return redirect(
+
+            url_for(
+
+                "masters.payment"
+
+            )
+
+        )
+
+
+    return render_template(
+
+        "add_payment.html",
+
+        bill_list=bill_list
+
+    )
+
+@masters_bp.route(
+    "/payment/get-bill-details/<int:bill_id>"
+)
+@login_required
+def get_bill_details(bill_id):
+
+    bill = BillSubmissionHeader.query.get_or_404(bill_id)
+
+    return jsonify({
+
+        "customer": bill.customer.customer_name,
+
+        "invoice_no": bill.invoice.invoice_no,
+
+        "invoice_date": bill.invoice.invoice_date.strftime("%d-%m-%Y"),
+
+        "bill_amount": bill.bill_amount
+
+    })    
+
+@masters_bp.route("/payment/view/<int:id>")
+@login_required
+def view_payment(id):
+
+    payment = PaymentReceiptHeader.query.get_or_404(id)
+
+    return render_template(
+
+        "view_payment.html",
+
+        payment=payment
+
+    )
+
+@masters_bp.route("/payment/cancel/<int:id>")
+@login_required
+def cancel_payment(id):
+
+    payment = PaymentReceiptHeader.query.get_or_404(id)
+
+    bill = payment.bill_submission
+
+    invoice = payment.invoice
+
+    bill.status = "OPEN"
+
+    invoice.status = "Bill Submitted"
+
+    db.session.delete(payment)
+
+    db.session.commit()
+
+    flash(
+
+        "Payment cancelled successfully.",
+
+        "success"
+
+    )
+
+    return redirect(
+
+        url_for("masters.payment")
 
     )

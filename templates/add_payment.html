@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>
+
+Receive Payment
+
+</h2>
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>
+
+Payment No
+
+</label>
+
+<input
+type="text"
+name="payment_no"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Payment Date
+
+</label>
+
+<input
+type="date"
+name="payment_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-6">
+
+<label>
+
+Bill Submission
+
+</label>
+
+<select
+
+id="bill_submission"
+
+name="bill_submission_header_id"
+
+class="form-select"
+
+required>
+
+<option value="">
+
+Select Bill
+
+</option>
+
+{% for bill in bill_list %}
+
+<option value="{{ bill.id }}">
+
+{{ bill.bill_submission_no }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>
+
+Customer
+
+</label>
+
+<input
+
+id="customer"
+
+class="form-control"
+
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Invoice
+
+</label>
+
+<input
+
+id="invoice_no"
+
+class="form-control"
+
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Invoice Date
+
+</label>
+
+<input
+
+id="invoice_date"
+
+class="form-control"
+
+readonly>
+
+</div>
+
+<div class="mb-3">
+
+<label>
+
+Remarks
+
+</label>
+
+<textarea
+name="remarks"
+class="form-control"></textarea>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>
+
+Bill Amount
+
+</label>
+
+<input
+
+id="bill_amount"
+
+name="bill_amount"
+
+class="form-control"
+
+readonly>
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Amount Received
+
+</label>
+
+<input
+
+id="amount_received"
+
+name="amount_received"
+
+type="number"
+
+step="0.01"
+
+value="0"
+
+class="form-control payment-field">
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+TDS Deducted
+
+</label>
+
+<input
+
+id="tds_deducted"
+
+name="tds_deducted"
+
+type="number"
+
+step="0.01"
+
+value="0"
+
+class="form-control payment-field">
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>
+
+LD Charges
+
+</label>
+
+<input
+
+id="ld_charges"
+
+name="ld_charges"
+
+type="number"
+
+step="0.01"
+
+value="0"
+
+class="form-control payment-field">
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+General Damage Charges
+
+</label>
+
+<input
+
+id="general_damage_charges"
+
+name="general_damage_charges"
+
+type="number"
+
+step="0.01"
+
+value="0"
+
+class="form-control payment-field">
+
+</div>
+
+<div class="col-md-4">
+
+<label>
+
+Other Deductions
+
+</label>
+
+<input
+
+id="other_deductions"
+
+name="other_deductions"
+
+type="number"
+
+step="0.01"
+
+value="0"
+
+class="form-control payment-field">
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-6">
+
+<label>
+
+Total Entered
+
+</label>
+
+<input
+
+id="total_entered"
+
+class="form-control"
+
+readonly>
+
+</div>
+
+<div class="col-md-6">
+
+<label>
+
+Difference
+
+</label>
+
+<input
+
+id="difference"
+
+class="form-control fw-bold"
+
+readonly>
+
+</div>
+
+</div>
+
+<hr>
+
+
+
+<button
+
+id="saveButton"
+
+class="btn btn-success"
+
+disabled>
+
+Save Payment
+
+</button>
+
+<a
+
+href="/payment"
+
+class="btn btn-secondary">
+
+Cancel
+
+</a>
+
+</form>
+
+</div>
+
+<script>
+
+$(function(){
+
+    $("#bill_submission").change(function(){
+
+        let bill = $(this).val();
+
+        if(bill=="")
+            return;
+
+        $.get(
+
+            "/payment/get-bill-details/"+bill,
+
+            function(data){
+
+                $("#customer").val(data.customer);
+
+                $("#invoice_no").val(data.invoice_no);
+
+                $("#invoice_date").val(data.invoice_date);
+
+                $("#bill_amount").val(
+                    data.bill_amount.toFixed(2)
+                );
+
+                calculatePayment();
+
+            }
+
+        );
+
+    });
+
+});
+
+</script>
+
+<script>
+
+function calculatePayment(){
+
+    let bill =
+        parseFloat($("#bill_amount").val()) || 0;
+
+    let received =
+        parseFloat($("#amount_received").val()) || 0;
+
+    let tds =
+        parseFloat($("#tds_deducted").val()) || 0;
+
+    let ld =
+        parseFloat($("#ld_charges").val()) || 0;
+
+    let gd =
+        parseFloat($("#general_damage_charges").val()) || 0;
+
+    let other =
+        parseFloat($("#other_deductions").val()) || 0;
+
+    let total =
+
+        received +
+
+        tds +
+
+        ld +
+
+        gd +
+
+        other;
+
+    let difference = bill - total;
+
+    $("#total_entered").val(
+
+        total.toFixed(2)
+
+    );
+
+    $("#difference").val(
+
+        difference.toFixed(2)
+
+    );
+
+    if(Math.abs(difference)<0.01){
+
+        $("#difference")
+
+            .removeClass("text-danger")
+
+            .addClass("text-success");
+
+        $("#saveButton").prop(
+
+            "disabled",
+
+            false
+
+        );
+
+    }
+
+    else{
+
+        $("#difference")
+
+            .removeClass("text-success")
+
+            .addClass("text-danger");
+
+        $("#saveButton").prop(
+
+            "disabled",
+
+            true
+
+        );
+
+    }
+
+}
+
+$(document).on(
+
+    "input",
+
+    ".payment-field",
+
+    calculatePayment
+
+);
+
+</script>
+
+{% endblock %}

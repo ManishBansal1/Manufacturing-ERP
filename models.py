@@ -1469,3 +1469,98 @@ class BillSubmissionDetail(db.Model):
     rnote_detail = db.relationship(
         "ReceivingNoteDetail"
     )
+
+class PaymentReceiptHeader(db.Model):
+
+    __tablename__ = "payment_receipt_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    payment_no = db.Column(
+        db.String(50),
+        unique=True,
+        nullable=False
+    )
+
+    payment_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    bill_submission_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("bill_submission_header.id"),
+        nullable=False
+    )
+
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customer_master.id"),
+        nullable=False
+    )
+
+    sales_invoice_header_id = db.Column(
+        db.Integer,
+        db.ForeignKey("sales_invoice_header.id"),
+        nullable=False
+    )
+
+    bill_amount = db.Column(
+        db.Float,
+        default=0
+    )
+
+    amount_received = db.Column(
+        db.Float,
+        default=0
+    )
+
+    tds_deducted = db.Column(
+        db.Float,
+        default=0
+    )
+
+    ld_charges = db.Column(
+        db.Float,
+        default=0
+    )
+
+    general_damage_charges = db.Column(
+        db.Float,
+        default=0
+    )
+
+    other_deductions = db.Column(
+        db.Float,
+        default=0
+    )
+
+    '''payment_mode = db.Column(
+        db.String(30)
+    )
+
+    bank_name = db.Column(
+        db.String(100)
+    )
+
+    utr_no = db.Column(
+        db.String(100)
+    )'''
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    status = db.Column(
+        db.String(30),
+        default="ACTIVE"
+    )
+
+    customer = db.relationship("CustomerMaster")
+
+    invoice = db.relationship("SalesInvoiceHeader")
+
+    bill_submission = db.relationship("BillSubmissionHeader")

@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="d-flex justify-content-between mb-3">
+
+<h2>
+
+Payment Receipt
+
+</h2>
+
+<a
+href="/payment/add"
+class="btn btn-success">
+
+Receive Payment
+
+</a>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>
+
+Payment No
+
+</th>
+
+<th>
+
+Payment Date
+
+</th>
+
+<th>
+
+Invoice
+
+</th>
+
+<th>
+
+Customer
+
+</th>
+
+<th>
+
+Bill Amount
+
+</th>
+
+<th>
+
+Received
+
+</th>
+
+<th>
+
+Status
+
+</th>
+
+<th>
+
+Action
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for payment in payment_list %}
+
+<tr>
+
+<td>
+
+{{ payment.payment_no }}
+
+</td>
+
+<td>
+
+{{ payment.payment_date.strftime("%d-%m-%Y") }}
+
+</td>
+
+<td>
+
+{{ payment.invoice.invoice_no }}
+
+</td>
+
+<td>
+
+{{ payment.customer.customer_name }}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(payment.bill_amount) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(payment.amount_received) }}
+
+</td>
+
+<td>
+
+{{ payment.status }}
+
+</td>
+
+<td>
+
+<a
+href="{{ url_for('masters.view_payment', id=payment.id) }}"
+class="btn btn-info btn-sm">
+
+View
+
+</a>
+
+<button
+class="btn btn-danger btn-sm"
+
+data-bs-toggle="modal"
+
+data-bs-target="#cancelPaymentModal"
+
+data-id="{{ payment.id }}"
+
+data-number="{{ payment.payment_no }}">
+
+Cancel
+
+</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Cancel Payment Modal -->
+
+<div class="modal fade"
+id="cancelPaymentModal"
+tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+
+                <h5 class="modal-title">
+
+                    Cancel Payment
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+
+                    Are you sure you want to cancel
+
+                    <strong id="paymentNumber"></strong> ?
+
+                </p>
+
+                <div class="alert alert-warning">
+
+                    <b>This will:</b>
+
+                    <ul class="mb-0">
+
+                        <li>Delete Payment</li>
+
+                        <li>Unlock Bill Submission</li>
+
+                        <li>Change Invoice Status back to Bill Submitted</li>
+
+                    </ul>
+
+                </div>
+
+                <p class="text-danger">
+
+                    This action cannot be undone.
+
+                </p>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+                <a
+                    id="confirmCancelPayment"
+                    href="#"
+                    class="btn btn-danger">
+
+                    Cancel Payment
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const paymentModal = document.getElementById(
+    "cancelPaymentModal"
+);
+
+paymentModal.addEventListener(
+    "show.bs.modal",
+    function(event){
+
+        let button = event.relatedTarget;
+
+        let paymentId = button.getAttribute(
+            "data-id"
+        );
+
+        let paymentNo = button.getAttribute(
+            "data-number"
+        );
+
+        document.getElementById(
+            "paymentNumber"
+        ).innerHTML = paymentNo;
+
+        document.getElementById(
+            "confirmCancelPayment"
+        ).href =
+        "/payment/cancel/" + paymentId;
+
+    }
+);
+
+</script>
+
+{% endblock %}
