@@ -1136,6 +1136,8 @@ class SalesInvoiceHeader(db.Model):
         cascade="all, delete-orphan"
     )
 
+    
+
 class SalesInvoiceDetail(db.Model):
 
     __tablename__ = "sales_invoice_detail"

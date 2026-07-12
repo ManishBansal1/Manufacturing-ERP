@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3"
+style="max-width: 99%;">
+
+<h2>
+
+Receivables Dashboard
+
+</h2>
+
+<hr>
+
+<!-- FILTERS -->
+
+<div class="card shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-2">
+
+<label>
+
+Financial Year
+
+</label>
+
+<select
+class="form-select"
+name="financial_year">
+
+{% for fy in financial_years %}
+
+<option
+value="{{ fy }}"
+{% if fy==current_fy %}selected{% endif %}>
+
+FY {{ fy }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-2">
+
+<label>
+
+From Date
+
+</label>
+
+<input
+type="date"
+class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label>
+
+To Date
+
+</label>
+
+<input
+type="date"
+class="form-control">
+
+</div>
+
+<div class="col-md-2">
+
+<label>
+
+Invoice Status
+
+</label>
+
+<select
+class="form-select"
+name="invoice_status">
+
+<option value="ALL">
+
+All
+
+</option>
+
+<option value="Pending RNote">
+
+Pending RNote
+
+</option>
+
+<option value="Pending Bill Submission">
+
+Pending Bill Submission
+
+</option>
+
+<option value="Bill Submitted" selected>
+
+Bill Submitted
+
+</option>
+
+<option value="Payment Received">
+
+Payment Received
+
+</option>
+
+<option value="CANCELLED">
+
+Cancelled
+
+</option>
+
+</select>
+
+</div>
+
+<div class="col-md-2">
+
+<label>
+
+Bill Status
+
+</label>
+
+<select
+class="form-select"
+name="bill_status">
+
+<option value="ALL">
+
+All
+
+</option>
+
+<option value="OPEN" selected>
+
+Open
+
+</option>
+
+<option value="PAYMENT RECEIVED">
+
+Payment Received
+
+</option>
+
+</select>
+
+</div>
+
+<div class="col-md-2 d-flex align-items-end">
+
+<button
+class="btn btn-primary w-100">
+
+Apply Filters
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SUMMARY CARDS -->
+
+<div class="row mb-4">
+
+<div class="col-md-3">
+
+<div class="card text-bg-danger shadow">
+
+<div class="card-body">
+
+<h6>
+
+Outstanding Amount
+
+</h6>
+
+<h3>
+
+₹0.00
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card text-bg-warning shadow">
+
+<div class="card-body">
+
+<h6>
+
+Bills Pending
+
+</h6>
+
+<h3>
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card text-bg-info shadow">
+
+<div class="card-body">
+
+<h6>
+
+Average Collection Days
+
+</h6>
+
+<h3>
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card text-bg-secondary shadow">
+
+<div class="card-body">
+
+<h6>
+
+Oldest Outstanding
+
+</h6>
+
+<h3>
+
+0 Days
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="card shadow">
+
+<div class="card-header">
+
+Receivables Detail
+
+</div>
+
+<div class="card-body">
+
+<div class="table-responsive"
+style="overflow-y: auto;">
+
+<table
+id="receivableTable"
+class="table table-bordered table-striped table-sm">
+
+<thead>
+
+<tr>
+
+<th>Customer PO</th>
+
+<th>Item</th>
+
+<th>Customer</th>
+
+<th>Destination</th>
+
+<th>Dispatch Qty</th>
+
+<th>Dispatch Date</th>
+
+<th>RNote Qty</th>
+
+<th>RNote Date</th>
+
+<th>Invoice No</th>
+
+<th>Invoice Date</th>
+
+<th>Bill Date</th>
+
+<th>Bill Amount</th>
+
+<th>Payment Date</th>
+
+<th>Payment Received</th>
+
+<th>TDS</th>
+
+<th>LD</th>
+
+<th>General Damage</th>
+
+<th>Other Deduction</th>
+
+<th>Pending Amount</th>
+
+<th>Collection Days</th>
+
+<th>Invoice Status</th>
+
+<th>Payment Status</th>
+
+<th>CO Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in receivable_rows %}
+
+<tr>
+
+<td>{{ row.customer_po_no }}</td>
+
+<td>{{ row["item_name"] }}</td>
+
+<td>{{ row.customer_name }}</td>
+
+<td>{{ row.destination_name }}</td>
+
+<td class="text-end">
+
+{{ row.dispatch_qty or 0 }}
+
+</td>
+
+<td>
+
+{{ row.invoice_date.strftime("%d-%m-%Y") }}
+
+</td>
+
+<td class="text-end">
+
+{{ row.received_qty or 0 }}
+
+</td>
+
+<td>
+
+{% if row.rnote_date %}
+
+{{ row.rnote_date.strftime("%d-%m-%Y") }}
+
+{% endif %}
+
+</td>
+
+<td>{{ row.invoice_no }}</td>
+
+<td>
+
+{{ row.invoice_date.strftime("%d-%m-%Y") }}
+
+</td>
+
+<td>
+
+{% if row.bill_submission_date %}
+
+{{ row.bill_submission_date.strftime("%d-%m-%Y") }}
+
+{% endif %}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(row.bill_amount or 0) }}
+
+</td>
+
+<td>
+
+{% if row.payment_date %}
+
+{{ row.payment_date.strftime("%d-%m-%Y") }}
+
+{% endif %}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(row.amount_received or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(row.tds_deducted or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(row.ld_charges or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(row.general_damage_charges or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "{:,.2f}".format(row.other_deductions or 0) }}
+
+</td>
+
+<td></td>
+
+<td></td>
+
+<td>{{ row.invoice_status }}</td>
+
+<td></td>
+
+<td></td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -2,16 +2,277 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
 
-<h2>Manufacturing ERP Dashboard</h2>
+<h2 class="mb-4">
 
-<div class="alert alert-success">
+Manufacturing ERP Dashboard
 
-Welcome to Manufacturing ERP
+</h2>
+
+<div class="card shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>Financial Year</label>
+
+<select class="form-select">
+
+<option>Current FY</option>
+
+<option>Previous FY</option>
+
+</select>
+
+</div>
+
+<div class="col-md-3">
+
+<label>From Date</label>
+
+<input
+type="date"
+class="form-control">
+
+</div>
+
+<div class="col-md-3">
+
+<label>To Date</label>
+
+<input
+type="date"
+class="form-control">
+
+</div>
+
+<div class="col-md-3">
+
+<label>Unit</label>
+
+<select class="form-select">
+
+<option>All Units</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-2">
+
+<a
+href="{{ url_for('dashboard.outstanding_receipts_dashboard') }}"
+class="text-decoration-none">
+
+<div class="card shadow text-center">
+
+<div class="card-body">
+
+<h6>
+
+Receivables
+
+</h6>
+
+<h3>
+
+₹0.00
+
+</h3>
+
+</div>
+
+</div>
+
+</a>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card shadow text-center">
+
+<div class="card-body">
+
+<h6>
+
+Labour %
+
+</h6>
+
+<h3>
+
+0%
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card shadow text-center">
+
+<div class="card-body">
+
+<h6>
+
+Raw Material %
+
+</h6>
+
+<h3>
+
+0%
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card shadow text-center">
+
+<div class="card-body">
+
+<h6>
+
+Production Completed
+
+</h6>
+
+<h3>
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card shadow text-center">
+
+<div class="card-body">
+
+<h6>
+
+Inventory Value
+
+</h6>
+
+<h3>
+
+₹0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card shadow text-center">
+
+<div class="card-body">
+
+<h6>
+
+Pending Production
+
+</h6>
+
+<h3>
+
+0
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!--Business Trend Chart-->
+
+<div class="card shadow mt-4">
+
+<div class="card-header">
+
+Overall Business Trend
+
+</div>
+
+<div class="card-body">
+
+<canvas id="businessTrend"></canvas>
+
+</div>
+
+</div>
+
+
+
+
+<!--Recent Alerts-->
+
+<div class="card shadow mt-4">
+
+<div class="card-header">
+
+Alerts
+
+</div>
+
+<div class="card-body">
+
+<ul>
+
+<li>
+
+No pending alerts.
+
+</li>
+
+</ul>
+
+</div>
 
 </div>
 
 </div>
 
 {% endblock %}
+
