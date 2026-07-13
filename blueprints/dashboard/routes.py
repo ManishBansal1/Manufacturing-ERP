@@ -33,8 +33,68 @@ dashboard_bp = Blueprint(
 @dashboard_bp.route("/dashboard")
 @login_required
 def dashboard():
+
+    receivable_value = 0
+
+    query = SalesInvoiceHeader.query.filter(
+        SalesInvoiceHeader.status != "Cancelled"
+    )
+
+    invoices = query.all()
+
+    for invoice in invoices:
+
+        bill = (
+            BillSubmissionHeader.query
+            .filter(
+                BillSubmissionHeader.sales_invoice_header_id == invoice.id,
+                BillSubmissionHeader.status != "Cancelled"
+            )
+            .order_by(
+                BillSubmissionHeader.id.desc()
+            )
+            .first()
+        )
+
+        payment = None
+
+        if bill:
+
+            payment = (
+                PaymentReceiptHeader.query
+                .filter(
+                    PaymentReceiptHeader.bill_submission_header_id == bill.id,
+                    PaymentReceiptHeader.status == "ACTIVE"
+                )
+                .first()
+            )
+
+        pending_amount = (
+            (bill.bill_amount if bill else 0)
+            -
+            (payment.amount_received if payment else 0)
+            -
+            (payment.tds_deducted if payment else 0)
+            -
+            (payment.ld_charges if payment else 0)
+            -
+            (payment.general_damage_charges if payment else 0)
+            -
+            (payment.other_deductions if payment else 0)
+        )
+
+        if invoice.status not in [
+            "Payment Received",
+            "Cancelled"
+        ]:
+
+            receivable_value += pending_amount
+
+
+
     return render_template(
-        "dashboard.html"
+        "dashboard.html",
+        receivable_value=receivable_value
     )
 
 @dashboard_bp.route("/dashboard/outstanding-receipts")
