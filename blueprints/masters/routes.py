@@ -1154,9 +1154,15 @@ def add_opening_stock():
             "qty"
         )
 
-        for item_id, qty in zip(
+        rates = request.form.getlist("rate")
+
+        values = request.form.getlist("value")
+
+        for item_id, qty, rate, value in zip(
             item_ids,
-            qtys
+            qtys,
+            rates,
+            values
         ):
 
             if not item_id or not qty:
@@ -1170,7 +1176,11 @@ def add_opening_stock():
 
                 item_id=item_id,
 
-                qty=float(qty)
+                qty=float(qty),
+
+                rate=float(rate or 0),
+
+                value=float(value or 0)
 
             )
 
@@ -1189,6 +1199,12 @@ def add_opening_stock():
                 qty_in=float(qty),
 
                 qty_out=0,
+
+                 unit_cost=float(rate or 0),
+
+                value_in=float(value or 0),
+
+                value_out=0,
 
                 reference_type=
                 "OPENING",

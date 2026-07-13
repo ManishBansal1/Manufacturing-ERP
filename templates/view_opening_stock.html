@@ -85,15 +85,19 @@ Item Name
 </th>
 
 <th>
-
 Qty
-
 </th>
 
 <th>
-
 Unit
+</th>
 
+<th>
+Rate
+</th>
+
+<th>
+Value
 </th>
 
 </tr>
@@ -119,15 +123,27 @@ Unit
 </td>
 
 <td>
-
-{{ "%.0f"|format(row.qty) }}
-
+{{ "%.4f"|format(row.qty) }}
 </td>
 
 <td>
-
 {{ row.item.unit }}
+</td>
 
+<td>
+{% if row.rate is not none %}
+₹ {{ "%.2f"|format(row.rate) }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>
+{% if row.value is not none %}
+₹ {{ "%.2f"|format(row.value) }}
+{% else %}
+-
+{% endif %}
 </td>
 
 </tr>

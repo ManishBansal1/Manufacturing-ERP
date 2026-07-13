@@ -329,6 +329,36 @@ class InventoryLedger(db.Model):
         default=0
     )
 
+    unit_cost = db.Column(
+    db.Float,
+    default=0
+    )
+
+    value_in = db.Column(
+        db.Float,
+        default=0
+    )
+
+    value_out = db.Column(
+        db.Float,
+        default=0
+    )
+
+    running_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    running_value = db.Column(
+        db.Float,
+        default=0
+    )
+
+    weighted_average_rate = db.Column(
+        db.Float,
+        default=0
+    )
+
     reference_type = db.Column(
         db.String(50)
     )
@@ -495,6 +525,18 @@ class OpeningStockDetail(db.Model):
     qty = db.Column(
         db.Float,
         nullable=False
+    )
+
+    rate = db.Column(
+    db.Float,
+    nullable=False,
+    default=0
+    )
+
+    value = db.Column(
+        db.Float,
+        nullable=False,
+        default=0
     )
 
     item = db.relationship(
