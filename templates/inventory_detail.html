@@ -32,7 +32,19 @@ Inventory Ledger
 
 <th>Qty Out</th>
 
-<th>Balance</th>
+<th>Unit Cost</th>
+
+<th>Value In</th>
+
+<th>Value Out</th>
+
+<th>Running Qty</th>
+
+<th>Running Value</th>
+
+<th>Avg Rate</th>
+
+
 
 </tr>
 
@@ -56,7 +68,17 @@ Inventory Ledger
 
 <td>{{ "%.0f"|format(row.qty_out) }}</td>
 
-<td>{{ "%.0f"|format(row.balance) }}</td>
+<td>{{ "%.2f"|format(row.unit_cost) }}</td>
+
+<td>{{ "%.2f"|format(row.value_in) }}</td>
+
+<td>{{ "%.2f"|format(row.value_out) }}</td>
+
+<td>{{ "%.2f"|format(row.running_qty) }}</td>
+
+<td>{{ "%.2f"|format(row.running_value) }}</td>
+
+<td>{{ "%.2f"|format(row.avg_rate) }}</td>
 
 </tr>
 

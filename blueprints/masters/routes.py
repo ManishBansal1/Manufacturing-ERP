@@ -14,6 +14,9 @@ from flask import flash
 
 from datetime import date
 
+from services.inventory_costing import update_inventory_cost
+from services.inventory_costing import rebuild_inventory
+
 from models import db
 from models import FinishedGood
 from models import ItemMaster
@@ -679,6 +682,8 @@ def add_production():
             recipe.output_qty
         )
 
+        total_material_cost = 0
+
         for row in recipe.inputs:
 
             qty = row.input_qty * factor
@@ -698,6 +703,28 @@ def add_production():
 
             db.session.add(detail)
 
+            last_cost = (
+                InventoryLedger.query
+                .filter_by(
+                    item_id=row.input_item_id,
+                    location_id=production.location_id
+                )
+                .order_by(
+                    InventoryLedger.id.desc()
+                )
+                .first()
+            )
+
+            avg_rate = (
+                last_cost.weighted_average_rate
+                if last_cost
+                else 0
+            )
+
+            issue_value = qty * avg_rate
+
+            total_material_cost += issue_value
+
             ledger = InventoryLedger(
 
                 trans_date=
@@ -710,6 +737,10 @@ def add_production():
                 production.location_id,
 
                 qty_out=qty,
+
+                unit_cost=avg_rate,
+
+                value_out=issue_value,
 
                 reference_type=
                 "PRODUCTION",
@@ -743,6 +774,11 @@ def add_production():
 
         db.session.add(detail)
 
+        if output_qty > 0:
+            fg_rate = total_material_cost / output_qty
+        else:
+            fg_rate = 0
+
         ledger = InventoryLedger(
 
             trans_date=
@@ -755,6 +791,10 @@ def add_production():
             production.location_id,
 
             qty_in=output_qty,
+
+            unit_cost=fg_rate,
+
+            value_in=total_material_cost,
 
             reference_type=
             "PRODUCTION",
@@ -813,6 +853,53 @@ def add_production():
             db.session.add(ledger)
 
         db.session.commit()
+
+        processed = set()
+
+        for row in recipe.inputs:
+
+            key = (
+                row.input_item_id,
+                production.location_id
+            )
+
+            if key not in processed:
+
+                update_inventory_cost(
+                    row.input_item_id
+                )
+
+                processed.add(key)
+
+
+        key = (
+            recipe.output_item_id,
+            production.location_id
+        )
+
+        if key not in processed:
+
+            update_inventory_cost(
+                recipe.output_item_id
+            )
+
+            processed.add(key)
+
+
+        for row in recipe.byproducts:
+
+            key = (
+                row.byproduct_item_id,
+                production.location_id
+            )
+
+            if key not in processed:
+
+                update_inventory_cost(
+                    row.byproduct_item_id
+                )
+
+                processed.add(key)
 
         return redirect(
             url_for(
@@ -907,11 +994,11 @@ def inventory():
 
             ItemMaster.unit,
 
-            LocationMaster.id.label(
-                "location_id"
-            ),
+            #LocationMaster.id.label(
+            #    "location_id"
+            #),
 
-            LocationMaster.location_name,
+            #LocationMaster.location_name,
 
             func.sum(
                 InventoryLedger.qty_in
@@ -929,7 +1016,15 @@ def inventory():
                 func.sum(
                     InventoryLedger.qty_out
                 )
-            ).label("stock")
+            ).label("stock"),
+
+            func.max(InventoryLedger.weighted_average_rate).label(
+                "avg_rate"
+            ),
+
+            func.max(InventoryLedger.running_value).label(
+                "stock_value"
+            )
 
         )
 
@@ -939,11 +1034,11 @@ def inventory():
             InventoryLedger.item_id
         )
 
-        .join(
-            LocationMaster,
-            InventoryLedger.location_id ==
-            LocationMaster.id
-        )
+        #.join(
+        #    LocationMaster,
+        #    InventoryLedger.location_id ==
+        #    LocationMaster.id
+        #)
 
     )
 
@@ -969,25 +1064,25 @@ def inventory():
         ItemMaster.item_type == item_type
     )
 
-    if location_id:
+    #if location_id:
 
-        query = query.filter(
+        #query = query.filter(
 
-            InventoryLedger.location_id ==
-            location_id
+            #InventoryLedger.location_id ==
+            #location_id
 
-        )
+        #)
 
-    stock = (
+    '''stock = (
 
         query.group_by(
 
             ItemMaster.id,
             ItemMaster.item_code,
             ItemMaster.item_name,
-            ItemMaster.unit,
-            LocationMaster.id,
-            LocationMaster.location_name
+            ItemMaster.unit
+            #LocationMaster.id,
+            #LocationMaster.location_name
 
         )
 
@@ -997,7 +1092,72 @@ def inventory():
 
         .all()
 
-    )
+    )'''
+
+    stock = []
+
+    items = ItemMaster.query.order_by(
+        ItemMaster.item_code
+    ).all()
+
+    for item in items:
+
+        latest = (
+            InventoryLedger.query
+            .filter_by(item_id=item.id)
+            .order_by(
+                InventoryLedger.trans_date.desc(),
+                InventoryLedger.id.desc()
+            )
+            .first()
+        )
+
+
+
+        if not latest:
+            continue
+
+        if fg_id:
+
+            if str(item.finished_good_id) != fg_id:
+                continue
+
+        if item_type:
+
+            if item.item_type != item_type:
+                continue
+
+        if item_search:
+
+            if item_search.lower() not in item.item_name.lower():
+                continue
+
+        running_qty = latest.running_qty or 0
+        running_value = latest.running_value or 0
+        avg_rate = latest.weighted_average_rate or 0
+        qty_out = latest.qty_out or 0
+
+        stock.append({
+
+            "item_id": item.id,
+
+            "item_code": item.item_code,
+
+            "item_name": item.item_name,
+
+            "unit": item.unit,
+
+            "received": running_qty + qty_out,
+
+            "issued": qty_out,
+
+            "stock": running_qty,
+
+            "avg_rate": avg_rate,
+
+            "stock_value": running_value
+
+        })
 
     location_list = LocationMaster.query.order_by(
 
@@ -1065,8 +1225,8 @@ def inventory_detail(item_id):
 
     for row in ledger_rows:
 
-        balance += row.qty_in
-        balance -= row.qty_out
+        #balance += row.qty_in
+        #balance -= row.qty_out
 
         movement.append({
 
@@ -1082,7 +1242,19 @@ def inventory_detail(item_id):
 
             "qty_out": row.qty_out,
 
-            "balance": balance
+            #"balance": balance
+
+            "unit_cost": row.unit_cost or 0,
+
+            "value_in": row.value_in or 0,
+
+            "value_out": row.value_out or 0,
+
+            "running_qty": row.running_qty or 0,
+
+            "running_value": row.running_value or 0,
+
+            "avg_rate": row.weighted_average_rate or 0
 
         })
 
@@ -1200,11 +1372,17 @@ def add_opening_stock():
 
                 qty_out=0,
 
-                 unit_cost=float(rate or 0),
+                unit_cost=float(rate or 0),
 
                 value_in=float(value or 0),
 
                 value_out=0,
+
+                running_qty=0,
+
+                running_value=0,
+
+                weighted_average_rate=0,
 
                 reference_type=
                 "OPENING",
@@ -1220,6 +1398,19 @@ def add_opening_stock():
             db.session.add(ledger)
 
         db.session.commit()
+
+        processed_items = set()
+
+        for item_id in item_ids:
+
+            if item_id and item_id not in processed_items:
+
+                update_inventory_cost(
+                    int(item_id)
+                )
+
+                processed_items.add(item_id)
+
 
         return redirect(
             url_for(
@@ -3848,5 +4039,29 @@ def cancel_payment(id):
     return redirect(
 
         url_for("masters.payment")
+
+    )
+
+@masters_bp.route(
+    "/inventory/recalculate"
+)
+@login_required
+def recalculate_inventory():
+
+    rebuild_inventory()
+
+    flash(
+
+        "Inventory costing rebuilt successfully.",
+
+        "success"
+
+    )
+
+    return redirect(
+
+        url_for(
+            "masters.inventory"
+        )
 
     )

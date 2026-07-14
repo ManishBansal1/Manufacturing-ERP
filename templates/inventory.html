@@ -8,6 +8,22 @@ Inventory Summary
 
 </h2>
 
+<div class="mb-3">
+
+<a
+
+href="{{ url_for('masters.recalculate_inventory') }}"
+
+class="btn btn-warning"
+
+onclick="return confirm('Recalculate inventory costing for all items?');">
+
+🔄 Refresh Inventory Costing
+
+</a>
+
+</div>
+
 <form
 method="GET"
 class="row mb-3">
@@ -143,10 +159,12 @@ Clear
 <th>Item Code</th>
 <th>Item Name</th>
 <th>Unit</th>
-<th>Location</th>
+<!--<th>Location</th>-->
 <th>Received</th>
 <th>Issued</th>
 <th>Current Stock</th>
+<th>Average Rate</th>
+<th>Stock Value</th>
 <th>Ledger</th>
 
 </tr>
@@ -165,7 +183,7 @@ Clear
 
 <td>{{ row.unit }}</td>
 
-<td>{{ row.location_name }}</td>
+<!--<td>{{ row.location_name }}</td>-->
 
 <td class="text-end">
 
@@ -194,6 +212,20 @@ text-danger fw-bold
 {{ "%.0f"|format(row.stock or 0) }}
 
 </td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.avg_rate or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.stock_value or 0) }}
+
+</td>
+
+
 
 <td>
 

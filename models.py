@@ -359,6 +359,11 @@ class InventoryLedger(db.Model):
         default=0
     )
 
+    transaction_value = db.Column(
+    db.Float,
+    default=0
+    )
+
     reference_type = db.Column(
         db.String(50)
     )
