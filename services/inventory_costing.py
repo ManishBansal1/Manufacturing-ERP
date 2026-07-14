@@ -40,40 +40,64 @@ def update_inventory_cost(item_id):
 
             else:
 
-                production_inputs = (
+                production_detail = (
                     ProductionEntryDetail.query
                     .filter_by(
                         production_entry_id=row.reference_id,
-                        transaction_type="INPUT"
+                        item_id=row.item_id
                     )
-                    .all()
+                    .first()
                 )
 
-                production_cost = 0
+                # -------------------------
+                # BYPRODUCT / SCRAP
+                # -------------------------
 
-                for input_row in production_inputs:
+                if (
+                    production_detail
+                    and
+                    production_detail.transaction_type == "SCRAP"
+                ):
 
-                    issue = (
-                        InventoryLedger.query
+                    row.value_in = 0
+                    row.unit_cost = 0
+
+                else:
+
+                    production_inputs = (
+                        ProductionEntryDetail.query
                         .filter_by(
-                            reference_type="PRODUCTION",
-                            reference_id=row.reference_id,
-                            item_id=input_row.item_id
+                            production_entry_id=row.reference_id,
+                            transaction_type="INPUT"
                         )
-                        .first()
+                        .all()
                     )
 
-                    if issue:
+                    production_cost = 0
 
-                        production_cost += (issue.value_out or 0)
+                    for input_row in production_inputs:
 
-                row.value_in = production_cost or 0
+                        issue = (
+                            InventoryLedger.query
+                            .filter_by(
+                                reference_type="PRODUCTION",
+                                reference_id=row.reference_id,
+                                item_id=input_row.item_id
+                            )
+                            .first()
+                        )
 
-                row.unit_cost = (
-                    production_cost / row.qty_in
-                    if row.qty_in > 0
-                    else 0
-                )
+                        if issue and issue.value_out:
+
+                            production_cost += (issue.value_out or 0)
+
+                    row.value_in = production_cost or 0
+
+                    row.unit_cost = (
+                        production_cost / row.qty_in
+                        if row.qty_in > 0
+                        else 0
+                    )
 
             running_qty += (row.qty_in or 0)
 
