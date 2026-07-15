@@ -1922,6 +1922,12 @@ def add_purchase_receipt():
 
                 qty_out=0,
 
+                unit_cost=float(rate),
+
+                value_in=float(basic),
+
+                value_out=0,
+
                 reference_type="PURCHASE",
 
                 reference_id=receipt.id,
@@ -1933,6 +1939,18 @@ def add_purchase_receipt():
             db.session.add(ledger)
 
         db.session.commit()
+
+        processed_items = set()
+
+        for item_id in item_ids:
+
+            if item_id and item_id not in processed_items:
+
+                update_inventory_cost(
+                    int(item_id)
+                )
+
+                processed_items.add(item_id)
 
         return redirect(
             url_for(
@@ -1976,6 +1994,14 @@ def delete_purchase_receipt(id):
 
     receipt = PurchaseReceiptHeader.query.get_or_404(id)
 
+    item_ids = [
+
+    d.item_id
+
+    for d in receipt.details
+
+    ]
+
     InventoryLedger.query.filter_by(
 
         reference_type="PURCHASE",
@@ -1993,6 +2019,16 @@ def delete_purchase_receipt(id):
     db.session.delete(receipt)
 
     db.session.commit()
+
+    processed_items = set()
+
+    for item_id in item_ids:
+
+        if item_id not in processed_items:
+
+            update_inventory_cost(item_id)
+
+            processed_items.add(item_id)
 
     return redirect(
         url_for("masters.purchase_receipt")
