@@ -26,17 +26,31 @@ def update_inventory_cost(item_id):
 
         if row.qty_in > 0:
 
-            # Opening Stock / Purchase etc.
+            # Opening Stock / Purchase / Stock Adjustment etc.
             if row.reference_type != "PRODUCTION":
 
-                if row.value_in is None:
-                    row.value_in = 0
+                if row.reference_type == "ADJUSTMENT":
 
-                row.unit_cost = (
-                    row.value_in / row.qty_in
-                    if row.qty_in > 0
-                    else 0
-                )
+                    avg = (
+                        running_value / running_qty
+                        if running_qty > 0
+                        else 0
+                    )
+
+                    row.unit_cost = avg
+
+                    row.value_in = avg * row.qty_in
+
+                else:
+
+                    if row.value_in is None:
+                        row.value_in = 0
+
+                    row.unit_cost = (
+                        row.value_in / row.qty_in
+                        if row.qty_in > 0
+                        else 0
+                    )
 
             else:
 

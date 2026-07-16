@@ -1096,6 +1096,8 @@ def inventory():
 
     stock = []
 
+    current_section = None
+
     items = ItemMaster.query.order_by(
         ItemMaster.item_code
     ).all()
@@ -1137,6 +1139,7 @@ def inventory():
         avg_rate = latest.weighted_average_rate or 0
         qty_out = latest.qty_out or 0
 
+
         stock.append({
 
             "item_id": item.id,
@@ -1146,6 +1149,8 @@ def inventory():
             "item_name": item.item_name,
 
             "unit": item.unit,
+
+            "item_type": item.item_type,
 
             "received": running_qty + qty_out,
 
@@ -1158,6 +1163,42 @@ def inventory():
             "stock_value": running_value
 
         })
+
+    type_order = [
+    "Raw Material",
+    "Intermediate Material",
+    "Assembled Goods",
+    "Finished Goods",
+    "Scrap"
+    ]
+
+    grouped_stock = []
+
+    for item_type in type_order:
+
+        rows = [
+
+            r for r in stock
+
+            if r.get("item_type") == item_type
+
+        ]
+
+        if not rows:
+
+            continue
+
+        grouped_stock.append({
+
+            "section": True,
+
+            "title": item_type
+
+        })
+
+        grouped_stock.extend(rows)
+
+    stock = grouped_stock
 
     location_list = LocationMaster.query.order_by(
 
@@ -1549,6 +1590,12 @@ def add_stock_adjustment():
                 if adj_type == "DECREASE"
                 else 0,
 
+                unit_cost=0,
+
+                value_in=0,
+
+                value_out=0,
+
                 reference_type="ADJUSTMENT",
 
                 reference_id=adjustment.id,
@@ -1560,6 +1607,18 @@ def add_stock_adjustment():
             db.session.add(ledger)
 
         db.session.commit()
+
+        processed_items = set()
+
+        for item_id in item_ids:
+
+            if item_id and item_id not in processed_items:
+
+                update_inventory_cost(
+                    int(item_id)
+                )
+
+                processed_items.add(item_id)
 
         return redirect(
             url_for(

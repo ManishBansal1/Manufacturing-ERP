@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+
+Inventory Summary
+
+</h2>
+
+<div class="mb-3">
+
+<a
+
+href="{{ url_for('masters.recalculate_inventory') }}"
+
+class="btn btn-warning"
+
+onclick="return confirm('Recalculate inventory costing for all items?');">
+
+🔄 Refresh Inventory Costing
+
+</a>
+
+</div>
+
+<form
+method="GET"
+class="row mb-3">
+
+<div class="col-md-3">
+
+<select
+name="fg_id"
+class="form-control">
+
+<option value="">
+
+All Finished Goods
+
+</option>
+
+{% for fg in fg_list %}
+
+<option
+value="{{ fg.id }}"
+{% if fg_id|string == fg.id|string %}
+selected
+{% endif %}>
+
+{{ fg.fg_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-2">
+
+<select
+name="item_type"
+class="form-control">
+
+<option value="">
+
+All Item Types
+
+</option>
+
+{% for type in item_types %}
+
+<option
+value="{{ type }}"
+{% if item_type == type %}
+selected
+{% endif %}>
+
+{{ type }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-3">
+
+<input
+type="text"
+name="item"
+class="form-control"
+placeholder="Search Item..."
+value="{{ item_search }}">
+
+</div>
+
+<div class="col-md-2">
+
+<select
+name="location_id"
+class="form-control">
+
+<option value="">
+
+All Locations
+
+</option>
+
+{% for loc in location_list %}
+
+<option
+value="{{ loc.id }}"
+{% if location_id|string == loc.id|string %}
+selected
+{% endif %}>
+
+{{ loc.location_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-2">
+
+<button
+class="btn btn-primary">
+
+Search
+
+</button>
+
+<a
+href="/inventory"
+class="btn btn-secondary">
+
+Clear
+
+</a>
+
+</div>
+
+</form>
+
+<table class="table table-bordered table-striped">
+
+<thead>
+
+<tr>
+
+<th>Item Code</th>
+<th>Item Name</th>
+<th>Unit</th>
+<!--<th>Location</th>-->
+<th>Received</th>
+<th>Issued</th>
+<th>Current Stock</th>
+<th>Average Rate</th>
+<th>Stock Value</th>
+<th>Ledger</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for row in stock %}
+
+<tr>
+
+<td>{{ row.item_code }}</td>
+
+<td>{{ row.item_name }}</td>
+
+<td>{{ row.unit }}</td>
+
+<!--<td>{{ row.location_name }}</td>-->
+
+<td class="text-end">
+
+{{ "%.0f"|format(row.received or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.0f"|format(row.issued or 0) }}
+
+</td>
+
+<td
+
+class="text-end
+
+{% if row.stock < 0 %}
+
+text-danger fw-bold
+
+{% endif %}
+
+">
+
+{{ "%.0f"|format(row.stock or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.avg_rate or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.stock_value or 0) }}
+
+</td>
+
+
+
+<td>
+
+    <a
+        href="/inventory/{{ row.item_id }}"
+        class="btn btn-info btn-sm">
+
+        View
+
+    </a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}

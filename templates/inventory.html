@@ -1,38 +1,309 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
-<h2>
+<style>
 
-Inventory Summary
+body{
 
-</h2>
+    background:#f4f7fb;
 
-<div class="mb-3">
+}
+
+.card{
+
+    border-radius:10px;
+
+    border:none;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+}
+
+.inventory-header tr:first-child th{
+
+    background:#2f6fad;
+
+    color:white;
+
+    text-align:center;
+
+    vertical-align:middle;
+
+    font-weight:600;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:5;
+
+}
+
+.inventory-header tr:nth-child(2) th{
+
+    position: sticky;
+
+    top: 38px;
+
+    z-index: 19;
+
+    background:#2f6fad;
+
+    color:white;
+
+    border:1px solid #b7cde5;
+
+}
+
+.inventory-header th{
+
+    padding:10px;
+
+    vertical-align:middle;
+
+
+
+}
+
+.table{
+
+    font-size:14px;
+
+}
+
+.table tbody tr:hover{
+
+    background:#eef6ff;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+}
+
+.section-header{
+
+    background:#dceaf8;
+
+    color:#16395f;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+}
+
+.section-total{
+
+    background:#f7fbff;
+
+    font-weight:bold;
+
+    border-top:2px solid #9fbfe4;
+
+}
+
+.report-heading{
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:8px;
+
+    border-left:5px solid #2f6fad;
+
+    margin-bottom:20px;
+
+    box-shadow:0 2px 6px rgba(0,0,0,.08);
+
+}
+
+.report-heading h4{
+
+    margin-bottom:5px;
+
+}
+
+.report-heading small{
+
+    color:#666;
+
+}
+
+.btn-primary{
+
+    background:#2f6fad;
+
+    border:none;
+
+}
+
+.btn-primary:hover{
+
+    background:#255989;
+
+}
+
+.btn-warning{
+
+    background:#f6b93b;
+
+    border:none;
+
+}
+
+.btn-success{
+
+    background:#1e9d59;
+
+    border:none;
+
+}
+
+.btn-danger{
+
+    border:none;
+
+}
+
+</style>
+
+
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div>
+
+        <h2 class="mb-0">
+
+            Inventory Summary
+
+        </h2>
+
+        <small class="text-muted">
+
+            Inventory Valuation & Stock Movement Report
+
+        </small>
+
+    </div>
+
+    <div>
+
+
+        <button
+            class="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#refreshModal">
+
+            🔄 Refresh Inventory Costing
+
+        </button>
+
+    </div>
+
+</div>
+
+<div
+class="modal fade"
+id="refreshModal"
+tabindex="-1">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header bg-warning">
+
+<h5 class="modal-title">
+
+Refresh Inventory Costing
+
+</h5>
+
+<button
+type="button"
+class="btn-close"
+data-bs-dismiss="modal">
+
+</button>
+
+</div>
+
+<div class="modal-body">
+
+This will recalculate the weighted average cost for every inventory item.
+
+<br><br>
+
+Depending on your database size, this may take a few seconds.
+
+</div>
+
+<div class="modal-footer">
+
+<button
+class="btn btn-secondary"
+data-bs-dismiss="modal">
+
+Cancel
+
+</button>
 
 <a
-
 href="{{ url_for('masters.recalculate_inventory') }}"
+class="btn btn-warning">
 
-class="btn btn-warning"
-
-onclick="return confirm('Recalculate inventory costing for all items?');">
-
-🔄 Refresh Inventory Costing
+Refresh
 
 </a>
 
 </div>
 
+</div>
+
+</div>
+
+</div>
+
+<div class="card mb-4">
+
+<div class="card-header bg-primary text-white">
+
+<b>
+
+Inventory Filters
+
+</b>
+
+</div>
+
+<div class="card-body">
+
 <form
-method="GET"
-class="row mb-3">
+id="filterForm"
+method="GET">
+
+<div class="row g-3">
 
 <div class="col-md-3">
 
+<label class="form-label">
+
+Finished Good
+
+</label>
+
 <select
+id="fg_id"
 name="fg_id"
-class="form-control">
+class="form-select">
 
 <option value="">
 
@@ -44,7 +315,7 @@ All Finished Goods
 
 <option
 value="{{ fg.id }}"
-{% if fg_id|string == fg.id|string %}
+{% if fg_id|string==fg.id|string %}
 selected
 {% endif %}>
 
@@ -60,9 +331,16 @@ selected
 
 <div class="col-md-2">
 
+<label class="form-label">
+
+Item Type
+
+</label>
+
 <select
+id="item_type"
 name="item_type"
-class="form-control">
+class="form-select">
 
 <option value="">
 
@@ -74,7 +352,7 @@ All Item Types
 
 <option
 value="{{ type }}"
-{% if item_type == type %}
+{% if item_type==type %}
 selected
 {% endif %}>
 
@@ -90,36 +368,32 @@ selected
 
 <div class="col-md-3">
 
-<input
-type="text"
-name="item"
-class="form-control"
-placeholder="Search Item..."
-value="{{ item_search }}">
+<label class="form-label">
 
-</div>
+Item
 
-<div class="col-md-2">
+</label>
 
 <select
-name="location_id"
-class="form-control">
+id="item"
+name="item"
+class="form-select">
 
 <option value="">
 
-All Locations
+All Items
 
 </option>
 
-{% for loc in location_list %}
+{% for row in stock %}
 
 <option
-value="{{ loc.id }}"
-{% if location_id|string == loc.id|string %}
+value="{{ row.item_name }}"
+{% if item_search==row.item_name %}
 selected
 {% endif %}>
 
-{{ loc.location_name }}
+{{ row.item_name }}
 
 </option>
 
@@ -131,41 +405,196 @@ selected
 
 <div class="col-md-2">
 
-<button
-class="btn btn-primary">
+<label class="form-label">
 
-Search
+From Date
 
-</button>
+</label>
 
-<a
-href="/inventory"
-class="btn btn-secondary">
+<input
+type="date"
+name="from_date"
+class="form-control">
 
-Clear
+</div>
 
-</a>
+<div class="col-md-2">
+
+<label class="form-label">
+
+To Date
+
+</label>
+
+<input
+type="date"
+name="to_date"
+class="form-control">
+
+</div>
+
+</div>
 
 </div>
 
 </form>
 
-<table class="table table-bordered table-striped">
+<!--Report Heading-->
 
-<thead>
+<div class="alert alert-light border">
+
+<h5 class="mb-1">
+
+Inventory Valuation Report
+
+</h5>
+
+<div class="text-muted">
+
+All Item Types
+
+•
+
+All Finished Goods
+
+•
+
+Current Position
+
+</div>
+
+</div>
+
+
+<!--Adding export buttons-->
+
+<div class="mb-3">
+
+<button
+class="btn btn-success">
+
+Excel
+
+</button>
+
+<button
+class="btn btn-danger">
+
+PDF
+
+</button>
+
+</div>
+
+<!--Adding table of Inventory Summary-->
+
+<div class="table-responsive"
+style="max-height:650px;">
+
+<table
+class="table table-bordered table-hover align-middle">
+
+<thead class="inventory-header">
 
 <tr>
 
-<th>Item Code</th>
-<th>Item Name</th>
-<th>Unit</th>
-<!--<th>Location</th>-->
-<th>Received</th>
-<th>Issued</th>
-<th>Current Stock</th>
-<th>Average Rate</th>
-<th>Stock Value</th>
-<th>Ledger</th>
+<th rowspan="2">
+
+Item Name
+
+</th>
+
+<th rowspan="2">
+
+Unit
+
+</th>
+
+<th colspan="2"
+class="text-center">
+
+Opening
+
+</th>
+
+<th colspan="2"
+class="text-center">
+
+Received
+
+</th>
+
+<th colspan="2"
+class="text-center">
+
+Issued
+
+</th>
+
+<th colspan="2"
+class="text-center">
+
+Closing
+
+</th>
+
+<th rowspan="2">
+
+Ledger
+
+</th>
+
+</tr>
+
+<tr>
+
+<th class="text-end">
+
+Qty
+
+</th>
+
+<th class="text-end">
+
+Value
+
+</th>
+
+<th class="text-end">
+
+Qty
+
+</th>
+
+<th class="text-end">
+
+Value
+
+</th>
+
+<th class="text-end">
+
+Qty
+
+</th>
+
+<th class="text-end">
+
+Value
+
+</th>
+
+<th class="text-end">
+
+Qty
+
+</th>
+
+<th class="text-end">
+
+Value
+
+</th>
 
 </tr>
 
@@ -175,76 +604,226 @@ Clear
 
 {% for row in stock %}
 
-<tr>
+{% if row.section %}
 
-<td>{{ row.item_code }}</td>
+<tr
+class="section-header section-toggle"
+data-section="{{ row.title|replace(' ','_') }}">
 
-<td>{{ row.item_name }}</td>
+<td colspan="11">
 
-<td>{{ row.unit }}</td>
+<span
+style="cursor:pointer;font-size:18px;">
 
-<!--<td>{{ row.location_name }}</td>-->
+▼
 
-<td class="text-end">
+</span>
 
-{{ "%.0f"|format(row.received or 0) }}
+&nbsp;
 
-</td>
-
-<td class="text-end">
-
-{{ "%.0f"|format(row.issued or 0) }}
-
-</td>
-
-<td
-
-class="text-end
-
-{% if row.stock < 0 %}
-
-text-danger fw-bold
-
-{% endif %}
-
-">
-
-{{ "%.0f"|format(row.stock or 0) }}
-
-</td>
-
-<td class="text-end">
-
-{{ "%.2f"|format(row.avg_rate or 0) }}
-
-</td>
-
-<td class="text-end">
-
-{{ "%.2f"|format(row.stock_value or 0) }}
-
-</td>
-
-
-
-<td>
-
-    <a
-        href="/inventory/{{ row.item_id }}"
-        class="btn btn-info btn-sm">
-
-        View
-
-    </a>
+{{ row.title }}
 
 </td>
 
 </tr>
+
+
+{% else %}
+
+<tr
+class="section-row"
+data-parent="{{ row.item_type|replace(' ','_') }}">
+
+<td>
+
+{{ row.item_name }}
+
+</td>
+
+<td>
+
+{{ row.unit }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.opening_qty or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.opening_value or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.received_qty or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.received_value or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.issued_qty or 0) }}
+
+</td>
+
+<td class="text-end">
+
+{{ "%.2f"|format(row.issued_value or 0) }}
+
+</td>
+
+<td class="text-end fw-bold">
+
+{{ "%.2f"|format(row.closing_qty or 0) }}
+
+</td>
+
+<td class="text-end fw-bold">
+
+{{ "%.2f"|format(row.closing_value or 0) }}
+
+</td>
+
+<td>
+
+<a
+href="/inventory/{{ row.item_id }}"
+class="btn btn-sm btn-outline-primary">
+
+View
+
+</a>
+
+</td>
+
+</tr>
+
+{% endif %}
 
 {% endfor %}
 
 </tbody>
 
 </table>
+
+</div>
+
+
+
+<!--Make Filters Auto Submit-->
+
+<script>
+
+new TomSelect("#fg_id");
+
+new TomSelect("#item_type");
+
+document.querySelectorAll(
+
+"#fg_id,#item_type"
+
+).forEach(
+
+function(x){
+
+x.addEventListener(
+
+"change",
+
+function(){
+
+document.getElementById(
+
+"filterForm"
+
+).submit();
+
+}
+
+);
+
+}
+
+);
+
+new TomSelect("#item");
+
+document.querySelectorAll(
+
+"#fg_id,#item_type,#item"
+
+).forEach(
+
+function(x){
+
+x.addEventListener(
+
+"change",
+
+function(){
+
+document.getElementById(
+
+"filterForm"
+
+).submit();
+
+}
+
+);
+
+}
+
+);
+
+</script>
+
+<script>
+
+document.querySelectorAll(".section-toggle").forEach(function(header){
+
+    header.addEventListener("click",function(){
+
+        let section=this.dataset.section;
+
+        let rows=document.querySelectorAll(
+
+            '[data-parent="'+section+'"]'
+
+        );
+
+        let icon=this.querySelector("span");
+
+        let collapsed=
+
+            icon.innerHTML=="▶";
+
+        rows.forEach(function(r){
+
+            r.style.display=
+
+                collapsed ? "" : "none";
+
+        });
+
+        icon.innerHTML=
+
+            collapsed ? "▼" : "▶";
+
+    });
+
+});
+
+</script>
 
 {% endblock %}
