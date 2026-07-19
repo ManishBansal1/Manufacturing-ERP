@@ -45,7 +45,7 @@ body{
 
     position: sticky;
 
-    top: 38px;
+    top: 42px;
 
     z-index: 19;
 
@@ -171,6 +171,8 @@ body{
 
 }
 
+
+
 </style>
 
 
@@ -186,16 +188,59 @@ body{
 
         </h2>
 
-        <small class="text-muted">
+            <small class="text-muted">
 
-            Inventory Valuation & Stock Movement Report
+                {{ item_type if item_type else "All Item Types" }}
 
-        </small>
+                •
+
+                {% if fg_id %}
+
+                    {% for fg in fg_list %}
+
+                        {% if fg.id|string == fg_id|string %}
+
+                            {{ fg.fg_name }}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                {% else %}
+
+                    All Finished Goods
+
+                {% endif %}
+
+                •
+
+                {{ from_date.strftime("%d %b %Y") }}
+
+                –
+
+                {{ to_date.strftime("%d %b %Y") }}
+
+            </small>
 
     </div>
 
-    <div>
+        <div class="d-flex gap-2">
 
+        <button
+            id="exportExcel"
+            class="btn btn-success">
+
+            Excel
+
+        </button>
+
+        <button
+            id="exportPDF"
+            class="btn btn-danger">
+
+            PDF
+
+        </button>
 
         <button
             class="btn btn-warning"
@@ -272,224 +317,193 @@ Refresh
 
 </div>
 
+
 <div class="card mb-4">
 
-<div class="card-header bg-primary text-white">
+    <div class="card-header bg-primary text-white">
 
-<b>
+        <b>
 
-Inventory Filters
+            Inventory Filters
 
-</b>
+        </b>
+
+    </div>
+
+    <div class="card-body">
+
+        <form
+            id="filterForm"
+            method="GET">
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+
+                        Finished Good
+
+                        </label>
+
+                        <select
+                            id="fg_id"
+                            name="fg_id"
+                            class="form-select">
+
+                            <option value="">
+
+                            All Finished Goods
+
+                            </option>
+
+                            {% for fg in fg_list %}
+
+                            <option
+                            value="{{ fg.id }}"
+                            {% if fg_id|string==fg.id|string %}
+                            selected
+                            {% endif %}>
+
+                            {{ fg.fg_name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+
+                        Item Type
+
+                        </label>
+
+                        <select
+                            id="item_type"
+                            name="item_type"
+                            class="form-select">
+
+                            <option value="">
+
+                            All Item Types
+
+                            </option>
+
+                            {% for type in item_types %}
+
+                            <option
+                            value="{{ type }}"
+                            {% if item_type==type %}
+                            selected
+                            {% endif %}>
+
+                            {{ type }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+
+                        Item
+
+                        </label>
+
+                        <select
+                            id="item"
+                            name="item"
+                            class="form-select">
+
+                            <option value="">
+
+                            All Items
+
+                            </option>
+
+                            {% for row in stock %}
+
+                            <option
+                            value="{{ row.item_name }}"
+                            {% if item_search==row.item_name %}
+                            selected
+                            {% endif %}>
+
+                            {{ row.item_name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+
+                        From Date
+
+                        </label>
+
+                        <input
+                        type="date"
+                        id="from_date"
+                        name="from_date"
+                        class="form-control"
+                        value="{{ from_date }}">
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+
+                        To Date
+
+                        </label>
+
+                        <input
+                        type="date"
+                        id="to_date"
+                        name="to_date"
+                        class="form-control"
+                        value="{{ to_date }}">
+
+                    </div>
+
+                    
+                </div>
+
+                
+
+        </form>
+    
+    </div>
 
 </div>
+    
 
-<div class="card-body">
 
-<form
-id="filterForm"
-method="GET">
 
-<div class="row g-3">
-
-<div class="col-md-3">
-
-<label class="form-label">
-
-Finished Good
-
-</label>
-
-<select
-id="fg_id"
-name="fg_id"
-class="form-select">
-
-<option value="">
-
-All Finished Goods
-
-</option>
-
-{% for fg in fg_list %}
-
-<option
-value="{{ fg.id }}"
-{% if fg_id|string==fg.id|string %}
-selected
-{% endif %}>
-
-{{ fg.fg_name }}
-
-</option>
-
-{% endfor %}
-
-</select>
-
-</div>
-
-<div class="col-md-2">
-
-<label class="form-label">
-
-Item Type
-
-</label>
-
-<select
-id="item_type"
-name="item_type"
-class="form-select">
-
-<option value="">
-
-All Item Types
-
-</option>
-
-{% for type in item_types %}
-
-<option
-value="{{ type }}"
-{% if item_type==type %}
-selected
-{% endif %}>
-
-{{ type }}
-
-</option>
-
-{% endfor %}
-
-</select>
-
-</div>
-
-<div class="col-md-3">
-
-<label class="form-label">
-
-Item
-
-</label>
-
-<select
-id="item"
-name="item"
-class="form-select">
-
-<option value="">
-
-All Items
-
-</option>
-
-{% for row in stock %}
-
-<option
-value="{{ row.item_name }}"
-{% if item_search==row.item_name %}
-selected
-{% endif %}>
-
-{{ row.item_name }}
-
-</option>
-
-{% endfor %}
-
-</select>
-
-</div>
-
-<div class="col-md-2">
-
-<label class="form-label">
-
-From Date
-
-</label>
-
-<input
-type="date"
-name="from_date"
-class="form-control">
-
-</div>
-
-<div class="col-md-2">
-
-<label class="form-label">
-
-To Date
-
-</label>
-
-<input
-type="date"
-name="to_date"
-class="form-control">
-
-</div>
-
-</div>
-
-</div>
-
-</form>
-
-<!--Report Heading-->
-
-<div class="alert alert-light border">
-
-<h5 class="mb-1">
-
-Inventory Valuation Report
-
-</h5>
-
-<div class="text-muted">
-
-All Item Types
-
-•
-
-All Finished Goods
-
-•
-
-Current Position
-
-</div>
-
-</div>
-
-
-<!--Adding export buttons-->
-
-<div class="mb-3">
-
-<button
-class="btn btn-success">
-
-Excel
-
-</button>
-
-<button
-class="btn btn-danger">
-
-PDF
-
-</button>
-
-</div>
 
 <!--Adding table of Inventory Summary-->
 
+<div id="inventoryReport">
+
 <div class="table-responsive"
-style="max-height:650px;">
+style="max-height:700px;">
 
 <table
 class="table table-bordered table-hover align-middle">
@@ -627,6 +641,60 @@ style="cursor:pointer;font-size:18px;">
 
 </tr>
 
+<!--Adding sectional totals-->
+
+{% elif row.section_total %}
+
+<tr class="table-secondary fw-bold">
+
+    <td colspan="2">
+
+        Total {{ row.title }}
+
+    </td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.opening_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.opening_value) }}</td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.received_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.received_value) }}</td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.issued_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.issued_value) }}</td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.closing_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.closing_value) }}</td>
+
+    <td></td>
+
+</tr>
+
+{% elif row.grand_total %}
+
+<tr class="table-primary fw-bold">
+
+    <td colspan="2">
+
+        Grand Total
+
+    </td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.opening_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.opening_value) }}</td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.received_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.received_value) }}</td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.issued_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.issued_value) }}</td>
+
+    <td class="text-end">{{ "{:,.2f}".format(row.closing_qty) }}</td>
+    <td class="text-end">{{ "{:,.2f}".format(row.closing_value) }}</td>
+
+    <td></td>
+
+</tr>
+
 
 {% else %}
 
@@ -648,49 +716,49 @@ data-parent="{{ row.item_type|replace(' ','_') }}">
 
 <td class="text-end">
 
-{{ "%.2f"|format(row.opening_qty or 0) }}
+{{ "{:,.2f}".format(row.opening_qty or 0) }}
 
 </td>
 
 <td class="text-end">
 
-{{ "%.2f"|format(row.opening_value or 0) }}
+{{ "{:,.2f}".format(row.opening_value or 0) }}
 
 </td>
 
 <td class="text-end">
 
-{{ "%.2f"|format(row.received_qty or 0) }}
+{{ "{:,.2f}".format(row.received_qty or 0) }}
 
 </td>
 
 <td class="text-end">
 
-{{ "%.2f"|format(row.received_value or 0) }}
+{{ "{:,.2f}".format(row.received_value or 0) }}
 
 </td>
 
 <td class="text-end">
 
-{{ "%.2f"|format(row.issued_qty or 0) }}
+{{ "{:,.2f}".format(row.issued_qty or 0) }}
 
 </td>
 
 <td class="text-end">
 
-{{ "%.2f"|format(row.issued_value or 0) }}
+{{ "{:,.2f}".format(row.issued_value or 0) }}
 
 </td>
 
 <td class="text-end fw-bold">
 
-{{ "%.2f"|format(row.closing_qty or 0) }}
+{{ "{:,.2f}".format(row.closing_qty or 0) }}
 
 </td>
 
 <td class="text-end fw-bold">
 
-{{ "%.2f"|format(row.closing_value or 0) }}
+{{ "{:,.2f}".format(row.closing_value or 0) }}
 
 </td>
 
@@ -708,6 +776,11 @@ View
 
 </tr>
 
+
+
+
+
+
 {% endif %}
 
 {% endfor %}
@@ -718,15 +791,29 @@ View
 
 </div>
 
+</div>
+
 
 
 <!--Make Filters Auto Submit-->
 
 <script>
 
-new TomSelect("#fg_id");
+new TomSelect("#fg_id",{
 
-new TomSelect("#item_type");
+    allowEmptyOption:true,
+
+    plugins:["clear_button"]
+
+});
+
+new TomSelect("#item_type",{
+
+    allowEmptyOption:true,
+
+    plugins:["clear_button"]
+
+});
 
 document.querySelectorAll(
 
@@ -756,11 +843,17 @@ document.getElementById(
 
 );
 
-new TomSelect("#item");
+new TomSelect("#item",{
+
+    allowEmptyOption:true,
+
+    plugins:["clear_button"]
+
+});
 
 document.querySelectorAll(
 
-"#fg_id,#item_type,#item"
+"#fg_id,#item_type,#item,#from_date,#to_date"
 
 ).forEach(
 
@@ -823,6 +916,33 @@ document.querySelectorAll(".section-toggle").forEach(function(header){
     });
 
 });
+
+</script>
+
+<script>
+    document.getElementById("exportExcel").onclick=function(){
+
+    var wb=XLSX.utils.table_to_book(
+
+        document.getElementById("inventoryTable"),
+
+        {
+
+            sheet:"Inventory"
+
+        }
+
+    );
+
+    XLSX.writeFile(
+
+        wb,
+
+        "Inventory Summary.xlsx"
+
+    );
+
+};
 
 </script>
 

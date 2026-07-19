@@ -976,12 +976,39 @@ def inventory():
         ""
     )
 
+    from_date = request.args.get(
+    "from_date",
+    ""
+)
+
+    to_date = request.args.get(
+        "to_date",
+        ""
+    )
+
     location_id = request.args.get(
         "location_id",
         ""
     )
 
-    query = (
+    if from_date:
+
+        from_date = date.fromisoformat(from_date)
+
+    else:
+
+        from_date = date.today().replace(day=1)
+
+
+    if to_date:
+
+        to_date = date.fromisoformat(to_date)
+
+    else:
+
+        to_date = date.today()
+
+    '''query = (
 
         db.session.query(
 
@@ -1063,7 +1090,7 @@ def inventory():
         query = query.filter(
         ItemMaster.item_type == item_type
     )
-
+'''
     #if location_id:
 
         #query = query.filter(
@@ -1096,7 +1123,9 @@ def inventory():
 
     stock = []
 
-    current_section = None
+    #current_section = None
+
+
 
     items = ItemMaster.query.order_by(
         ItemMaster.item_code
@@ -1104,7 +1133,7 @@ def inventory():
 
     for item in items:
 
-        latest = (
+        '''latest = (
             InventoryLedger.query
             .filter_by(item_id=item.id)
             .order_by(
@@ -1117,7 +1146,7 @@ def inventory():
 
 
         if not latest:
-            continue
+            continue'''
 
         if fg_id:
 
@@ -1134,10 +1163,91 @@ def inventory():
             if item_search.lower() not in item.item_name.lower():
                 continue
 
-        running_qty = latest.running_qty or 0
+        '''running_qty = latest.running_qty or 0
         running_value = latest.running_value or 0
         avg_rate = latest.weighted_average_rate or 0
-        qty_out = latest.qty_out or 0
+        qty_out = latest.qty_out or 0'''
+
+        opening = db.session.query(
+
+            func.coalesce(func.sum(InventoryLedger.qty_in), 0).label("qty_in"),
+
+            func.coalesce(func.sum(InventoryLedger.qty_out), 0).label("qty_out"),
+
+            func.coalesce(func.sum(InventoryLedger.value_in), 0).label("value_in"),
+
+            func.coalesce(func.sum(InventoryLedger.value_out), 0).label("value_out")
+
+        ).filter(
+
+            InventoryLedger.item_id == item.id,
+
+            InventoryLedger.trans_date < from_date
+
+        ).first()
+
+        opening_qty = opening.qty_in - opening.qty_out
+
+        opening_value = opening.value_in - opening.value_out
+
+        movement = db.session.query(
+
+            func.coalesce(func.sum(InventoryLedger.qty_in), 0).label("qty_in"),
+
+            func.coalesce(func.sum(InventoryLedger.qty_out), 0).label("qty_out"),
+
+            func.coalesce(func.sum(InventoryLedger.value_in), 0).label("value_in"),
+
+            func.coalesce(func.sum(InventoryLedger.value_out), 0).label("value_out")
+
+        ).filter(
+
+            InventoryLedger.item_id == item.id,
+
+            InventoryLedger.trans_date >= from_date,
+
+            InventoryLedger.trans_date <= to_date
+
+        ).first()
+
+        received_qty = movement.qty_in
+
+        received_value = movement.value_in
+
+        issued_qty = movement.qty_out
+
+        issued_value = movement.value_out
+
+        closing_qty = (
+
+            opening_qty
+
+            + received_qty
+
+            - issued_qty
+
+        )
+
+        closing_value = (
+
+            opening_value
+
+            + received_value
+
+            - issued_value
+
+        )
+
+        if closing_qty > 0:
+
+            avg_rate = closing_value / closing_qty
+
+        else:
+
+            avg_rate = 0
+
+        #closing_qty = running_qty
+        #closing_value = running_value
 
 
         stock.append({
@@ -1152,15 +1262,22 @@ def inventory():
 
             "item_type": item.item_type,
 
-            "received": running_qty + qty_out,
+            "opening_qty": opening_qty,
 
-            "issued": qty_out,
+            "opening_value": opening_value,
 
-            "stock": running_qty,
+            "received_qty": received_qty,
+
+            "received_value": received_value,
+
+            "issued_qty": issued_qty,
+
+            "issued_value": issued_value,
+
+            "closing_qty": closing_qty,
+            "closing_value": closing_value,
 
             "avg_rate": avg_rate,
-
-            "stock_value": running_value
 
         })
 
@@ -1174,15 +1291,122 @@ def inventory():
 
     grouped_stock = []
 
-    for item_type in type_order:
+    section_opening_qty = 0
+    section_opening_value = 0
+
+    section_received_qty = 0
+    section_received_value = 0
+
+    section_issued_qty = 0
+    section_issued_value = 0
+
+    section_closing_qty = 0
+    section_closing_value = 0
+
+
+    grand_opening_qty = 0
+    grand_opening_value = 0
+
+    grand_received_qty = 0
+    grand_received_value = 0
+
+    grand_issued_qty = 0
+    grand_issued_value = 0
+
+    grand_closing_qty = 0
+    grand_closing_value = 0
+
+    for section_type in type_order:
 
         rows = [
 
             r for r in stock
 
-            if r.get("item_type") == item_type
+            if r.get("item_type") == section_type
 
         ]
+
+        '''section_opening_qty = sum(r["opening_qty"] for r in rows)
+        section_opening_value = sum(r["opening_value"] for r in rows)
+
+        section_received_qty = sum(r["received_qty"] for r in rows)
+        section_received_value = sum(r["received_value"] for r in rows)
+
+        section_issued_qty = sum(r["issued_qty"] for r in rows)
+        section_issued_value = sum(r["issued_value"] for r in rows)
+
+        section_closing_qty = sum(r["closing_qty"] for r in rows)
+        section_closing_value = sum(r["closing_value"] for r in rows)
+
+        grand_opening_qty += section_opening_qty
+        grand_opening_value += section_opening_value
+
+        grand_received_qty += section_received_qty
+        grand_received_value += section_received_value
+
+        grand_issued_qty += section_issued_qty
+        grand_issued_value += section_issued_value
+
+        grand_closing_qty += section_closing_qty
+        grand_closing_value += section_closing_value'''
+
+        if rows:
+
+            section_opening_qty = sum(
+                r["opening_qty"] or 0
+                for r in rows
+            )
+
+            section_opening_value = sum(
+                r["opening_value"] or 0
+                for r in rows
+            )
+
+            section_received_qty = sum(
+                r["received_qty"] or 0
+                for r in rows
+            )
+
+            section_received_value = sum(
+                r["received_value"] or 0
+                for r in rows
+            )
+
+            section_issued_qty = sum(
+                r["issued_qty"] or 0
+                for r in rows
+            )
+
+            section_issued_value = sum(
+                r["issued_value"] or 0
+                for r in rows
+            )
+
+            section_closing_qty = sum(
+                r["closing_qty"] or 0
+                for r in rows
+            )
+
+            section_closing_value = sum(
+                r["closing_value"] or 0
+                for r in rows
+            )
+
+            grand_opening_qty += section_opening_qty
+            grand_opening_value += section_opening_value
+
+            grand_received_qty += section_received_qty
+            grand_received_value += section_received_value
+
+            grand_issued_qty += section_issued_qty
+            grand_issued_value += section_issued_value
+
+            grand_closing_qty += section_closing_qty
+            grand_closing_value += section_closing_value
+
+            #grand_qty += section_qty
+
+            #grand_value += section_value
 
         if not rows:
 
@@ -1192,19 +1416,57 @@ def inventory():
 
             "section": True,
 
-            "title": item_type
+            "title": section_type
 
         })
 
         grouped_stock.extend(rows)
 
+        grouped_stock.append({
+
+            "section_total": True,
+
+            "title": section_type,
+
+            "opening_qty": section_opening_qty,
+            "opening_value": section_opening_value,
+
+            "received_qty": section_received_qty,
+            "received_value": section_received_value,
+
+            "issued_qty": section_issued_qty,
+            "issued_value": section_issued_value,
+
+            "closing_qty": section_closing_qty,
+            "closing_value": section_closing_value
+
+        })
+
+    grouped_stock.append({
+
+        "grand_total": True,
+
+        "opening_qty": grand_opening_qty,
+        "opening_value": grand_opening_value,
+
+        "received_qty": grand_received_qty,
+        "received_value": grand_received_value,
+
+        "issued_qty": grand_issued_qty,
+        "issued_value": grand_issued_value,
+
+        "closing_qty": grand_closing_qty,
+        "closing_value": grand_closing_value
+
+    })
+
     stock = grouped_stock
 
-    location_list = LocationMaster.query.order_by(
+    '''location_list = LocationMaster.query.order_by(
 
         LocationMaster.location_name
 
-    ).all()
+    ).all()'''
 
     fg_list = FinishedGood.query.order_by(
     FinishedGood.fg_name
@@ -1235,7 +1497,7 @@ def inventory():
 
     location_id=location_id,
 
-    location_list=location_list,
+    #location_list=location_list,
 
     fg_list=fg_list,
 
@@ -1243,7 +1505,11 @@ def inventory():
 
     item_types=item_types,
 
-    item_type=item_type
+    item_type=item_type,
+
+    from_date=from_date,
+
+    to_date=to_date
 
     )
 
