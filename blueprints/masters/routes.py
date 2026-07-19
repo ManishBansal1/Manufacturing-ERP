@@ -1513,6 +1513,9 @@ def inventory():
 
     )
 
+
+
+
 @masters_bp.route("/inventory/<int:item_id>")
 @login_required
 def inventory_detail(item_id):

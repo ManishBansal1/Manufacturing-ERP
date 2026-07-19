@@ -176,7 +176,7 @@ body{
 </style>
 
 
-
+<div id="printArea">
 
 <div class="d-flex justify-content-between align-items-center mb-3">
 
@@ -227,16 +227,22 @@ body{
         <div class="d-flex gap-2">
 
         <button
+            type="button"
             id="exportExcel"
             class="btn btn-success">
+
+            <i class="bi bi-file-earmark-excel"></i>
 
             Excel
 
         </button>
 
         <button
-            id="exportPDF"
+            type="button"
+            id="printPDF"
             class="btn btn-danger">
+
+            <i class="bi bi-printer"></i>
 
             PDF
 
@@ -502,10 +508,13 @@ Refresh
 
 <div id="inventoryReport">
 
-<div class="table-responsive"
+<div 
+id="inventoryContainer"
+class="table-responsive"
 style="max-height:700px;">
 
 <table
+id="inventoryTable"
 class="table table-bordered table-hover align-middle">
 
 <thead class="inventory-header">
@@ -793,6 +802,7 @@ View
 
 </div>
 
+</div>
 
 
 <!--Make Filters Auto Submit-->
@@ -943,6 +953,96 @@ document.querySelectorAll(".section-toggle").forEach(function(header){
     );
 
 };
+
+</script>
+
+<!--This CSS is to generate print page-->
+<style>
+
+@media print {
+
+    body * {
+        visibility: hidden;
+    }
+
+    #printArea,
+    #printArea * {
+        visibility: visible;
+    }
+
+    #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    .btn,
+    .modal,
+    script {
+        display: none !important;
+    }
+
+    table {
+        font-size: 10px;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+
+}
+
+
+
+</style>
+
+<!--This script generates PDF file for print-->
+
+<script>
+
+document.getElementById("printPDF").addEventListener("click", function () {
+
+    const container = document.getElementById("inventoryContainer");
+
+    // Remember original height
+    const originalHeight = container.style.maxHeight;
+
+    // Expand full table
+    container.style.maxHeight = "none";
+    container.style.overflow = "visible";
+
+    // Expand all sections
+    document.querySelectorAll(".section-row").forEach(function(row){
+
+        row.style.display = "";
+
+    });
+
+    document.querySelectorAll(".section-toggle span").forEach(function(icon){
+
+        icon.innerHTML = "▼";
+
+    });
+
+    // Give browser time to repaint
+
+    setTimeout(function(){
+
+        window.print();
+
+        // Restore page
+
+        container.style.maxHeight = originalHeight;
+        container.style.overflow = "auto";
+
+    },300);
+
+});
 
 </script>
 
