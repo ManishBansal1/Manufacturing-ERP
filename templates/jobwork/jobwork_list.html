@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+
+<h2>Job Work Orders</h2>
+
+<a
+href="{{ url_for('jobwork.add_jobwork') }}"
+class="btn btn-success">
+
+New Job Work Order
+
+</a>
+
+</div>
+
+
+<table class="table table-bordered">
+
+
+
+<thead>
+
+
+<tr>
+
+<th>ID</th>
+
+<th>Date</th>
+
+<th>Vendor</th>
+
+<th>Status</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for job in jobs %}
+
+<tr>
+
+<td>{{ job.id }}</td>
+
+<td>{{ job.jobwork_date }}</td>
+
+<td>{{ job.vendor.vendor_name }}</td>
+
+<td>{{ job.status }}</td>
+
+<td>
+
+<button
+class="btn btn-primary btn-sm">
+
+Open
+
+</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}

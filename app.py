@@ -14,12 +14,10 @@ from blueprints.masters.routes import masters_bp
 
 from blueprints.sales import sales_bp
 
+from blueprints.jobwork.routes import jobwork_bp
+
 
 app = Flask(__name__)
-
-app.register_blueprint(dashboard_bp)
-app.register_blueprint(auth_bp)
-app.register_blueprint(masters_bp)
 
 app.config.from_object(Config)
 
@@ -30,6 +28,13 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 login_manager.login_view = "auth.login"
+
+
+app.register_blueprint(auth_bp)
+app.register_blueprint(dashboard_bp)
+app.register_blueprint(masters_bp)
+app.register_blueprint(jobwork_bp)
+
 
 @login_manager.user_loader
 def load_user(user_id):

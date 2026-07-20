@@ -1613,3 +1613,129 @@ class PaymentReceiptHeader(db.Model):
     invoice = db.relationship("SalesInvoiceHeader")
 
     bill_submission = db.relationship("BillSubmissionHeader")
+
+class JobWorkHeader(db.Model):
+
+    __tablename__ = "job_work_header"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    jobwork_no = db.Column(
+        db.String(30),
+        unique=True,
+        nullable=False
+    )
+
+    jobwork_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    expected_return_date = db.Column(
+    db.Date,
+    nullable = True
+    )
+
+    vendor_id = db.Column(
+        db.Integer,
+        db.ForeignKey("vendor_master.id"),
+        nullable=False
+    )
+
+    output_item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    planned_output_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    job_work_cost = db.Column(
+        db.Float,
+        default=0
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="Open"
+    )
+
+    remarks = db.Column(
+        db.String(300)
+    )
+
+    vendor = db.relationship(
+        "VendorMaster"
+    )
+
+    output_item = db.relationship(
+        "ItemMaster"
+    )
+
+class JobWorkDetail(db.Model):
+
+    __tablename__ = "job_work_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    job_work_id = db.Column(
+        db.Integer,
+        db.ForeignKey("job_work_header.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    line_type = db.Column(
+        db.String(20),
+        nullable=False
+    )
+    # INPUT
+    # OUTPUT
+    # SCRAP
+
+    expected_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    actual_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    value = db.Column(
+        db.Float,
+        default=0
+    )
+
+    remarks = db.Column(
+        db.String(250)
+    )
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+
+    jobwork = db.relationship(
+        "JobWorkHeader",
+        backref="details"
+    )

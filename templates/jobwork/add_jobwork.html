@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+<div class="card">
+
+<div class="card-header bg-primary text-white">
+
+<h4>
+
+New Job Work Order
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+    {% for category, message in messages %}
+
+    <div class="alert alert-{{ category }}">
+
+    {{ message }}
+
+    </div>
+
+    {% endfor %}
+
+    {% endif %}
+
+    {% endwith %}
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<label>
+
+Job Work No
+
+</label>
+
+<input
+type="text"
+name="jobwork_no"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Date
+
+</label>
+
+<input
+type="date"
+name="jobwork_date"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Job Worker
+
+</label>
+
+<select
+name="vendor_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Job Worker
+
+</option>
+
+{% for vendor in vendors %}
+
+<option value="{{ vendor.id }}">
+
+{{ vendor.vendor_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-3">
+
+<label>
+
+Output Item
+
+</label>
+
+<select
+name="output_item_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Output Item
+
+</option>
+
+{% for item in items %}
+
+<option value="{{ item.id }}">
+
+{{ item.item_code }} - {{ item.item_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-2">
+
+<label>
+
+Planned Qty
+
+</label>
+
+<input
+type="number"
+step="0.001"
+name="planned_output_qty"
+class="form-control"
+required>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<label>
+
+Expected Return
+
+</label>
+
+<input
+type="date"
+name="expected_return_date"
+class="form-control">
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-12">
+
+<label>
+
+Remarks
+
+</label>
+
+<textarea
+name="remarks"
+class="form-control"
+rows="2"></textarea>
+
+</div>
+
+</div>
+
+<br>
+
+<button
+class="btn btn-success">
+
+Save & Continue
+
+</button>
+
+<a
+href="{{ url_for('jobwork.jobwork_list') }}"
+class="btn btn-secondary">
+
+Cancel
+
+</a>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
