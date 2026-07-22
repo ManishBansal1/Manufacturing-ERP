@@ -1678,6 +1678,8 @@ class JobWorkHeader(db.Model):
         "ItemMaster"
     )
 
+    
+
 class JobWorkDetail(db.Model):
 
     __tablename__ = "job_work_detail"
@@ -1738,4 +1740,65 @@ class JobWorkDetail(db.Model):
     jobwork = db.relationship(
         "JobWorkHeader",
         backref="details"
+    )
+
+
+class JobWorkLedger(db.Model):
+
+    __tablename__ = "job_work_ledger"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    job_work_id = db.Column(
+        db.Integer,
+        db.ForeignKey("job_work_header.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    issued_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    received_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    balance_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    issued_rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    issued_value = db.Column(
+        db.Float,
+        default=0
+    )
+
+    line_type = db.Column(
+        db.String(20)
+    )
+    # INPUT
+    # SCRAP
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+
+    jobwork = db.relationship(
+        "JobWorkHeader"
     )

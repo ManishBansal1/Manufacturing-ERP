@@ -129,9 +129,13 @@ def jobwork_details(id):
 
     job = JobWorkHeader.query.get_or_404(id)
 
+    
     details = JobWorkDetail.query.filter_by(
         job_work_id=id
     ).all()
+
+
+    
 
     if len(details) == 0:
 
@@ -199,8 +203,45 @@ def jobwork_details(id):
             db.session.commit()
 
             details = JobWorkDetail.query.filter_by(
-                job_work_id=id
+            job_work_id=id
             ).all()
+
+
+
+    if request.method == "POST":
+
+    
+
+        job.job_work_cost = float(
+                    request.form["job_work_cost"]
+                )
+
+        for row in details:
+
+            qty = request.form.get(
+                        f"expected_qty_{row.id}"
+                    )
+
+            if qty:
+
+                        row.expected_qty = float(qty)
+
+        db.session.commit()
+
+        flash(
+                    f"Job Work Order {job.jobwork_no} saved successfully.",
+                    "success"
+                )
+        
+
+        
+        return redirect(
+                    url_for(
+                        "jobwork.jobwork_list",
+                        id=id
+                    )
+                )
+    
 
     items = ItemMaster.query.order_by(
         ItemMaster.item_name
