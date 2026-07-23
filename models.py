@@ -120,6 +120,12 @@ class ItemMaster(db.Model):
     default=18
     )
 
+    piece_rate = db.Column(
+        db.Float,
+        default=0,
+        nullable=True
+    )
+
     active = db.Column(
         db.Boolean,
         default=True
@@ -1964,3 +1970,148 @@ class JobWorkReceiptDetail(db.Model):
     job_work_detail = db.relationship(
         "JobWorkDetail"
     )
+
+# ============================================================
+# LABOUR MODULE MODELS
+# ============================================================
+
+class LabourTypeMaster(db.Model):
+    __tablename__ = "labour_type_master"
+
+    id = db.Column(db.Integer, primary_key=True)
+    type_code = db.Column(db.String(20), unique=True, nullable=False)
+    type_name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500))
+    active = db.Column(db.Boolean, default=True)
+
+
+class LabourContractorMaster(db.Model):
+    __tablename__ = "labour_contractor_master"
+
+    id = db.Column(db.Integer, primary_key=True)
+    contractor_code = db.Column(db.String(20), unique=True, nullable=True)
+    contractor_name = db.Column(db.String(200), nullable=False)
+    contact_person = db.Column(db.String(100))
+    mobile = db.Column(db.String(20))
+    email = db.Column(db.String(100))
+    gst_no = db.Column(db.String(30))
+    pan_no = db.Column(db.String(20))
+    address = db.Column(db.String(500))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    active = db.Column(db.Boolean, default=True)
+
+    labours = db.relationship("LabourMaster", backref="contractor", lazy=True)
+
+
+class LabourMaster(db.Model):
+    __tablename__ = "labour_master"
+
+    id = db.Column(db.Integer, primary_key=True)
+    labour_code = db.Column(db.String(20), unique=True, nullable=True)
+    labour_name = db.Column(db.String(200), nullable=False)
+    father_name = db.Column(db.String(200))
+    gender = db.Column(db.String(10))  # Male / Female / Other
+    date_of_birth = db.Column(db.Date)
+    age = db.Column(db.Integer)
+    blood_group = db.Column(db.String(10))
+    aadhar_no = db.Column(db.String(20))
+    mobile = db.Column(db.String(20))
+    address = db.Column(db.String(500))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    pincode = db.Column(db.String(20))
+
+    # Work Details
+    labour_type_id = db.Column(db.Integer, db.ForeignKey("labour_type_master.id"), nullable=False)
+    contractor_id = db.Column(db.Integer, db.ForeignKey("labour_contractor_master.id"), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey("location_master.id"), nullable=False)
+
+    # Rate Details
+    wage_type = db.Column(db.String(20), nullable=False, default="DAILY")
+    # DAILY = Daily wages
+    # PIECE = Piece rate
+
+    daily_wage_rate = db.Column(db.Float, default=0)
+    # For piece rate - rate is stored in ItemMaster.piece_rate
+
+    # For contractors who pay labour, we track what we pay contractor
+    contractor_rate = db.Column(db.Float, default=0)
+
+    active = db.Column(db.Boolean, default=True)
+
+    labour_type = db.relationship("LabourTypeMaster")
+    location = db.relationship("LocationMaster")
+
+    # Add piece_rate to ItemMaster - we'll handle this via migration
+
+
+class LabourDailySheetHeader(db.Model):
+    __tablename__ = "labour_daily_sheet_header"
+
+    id = db.Column(db.Integer, primary_key=True)
+    sheet_no = db.Column(db.String(30), unique=True, nullable=False)
+    sheet_date = db.Column(db.Date, nullable=False)
+    contractor_id = db.Column(db.Integer, db.ForeignKey("labour_contractor_master.id"), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey("location_master.id"), nullable=False)
+    remarks = db.Column(db.String(500))
+    status = db.Column(db.String(20), default="DRAFT")  # DRAFT, APPROVED
+
+    contractor = db.relationship("LabourContractorMaster")
+    location = db.relationship("LocationMaster")
+    entries = db.relationship("LabourDailySheetEntry", backref="sheet", cascade="all, delete-orphan")
+
+
+class LabourDailySheetEntry(db.Model):
+    __tablename__ = "labour_daily_sheet_entry"
+
+    id = db.Column(db.Integer, primary_key=True)
+    sheet_id = db.Column(db.Integer, db.ForeignKey("labour_daily_sheet_header.id"), nullable=False)
+    labour_id = db.Column(db.Integer, db.ForeignKey("labour_master.id"), nullable=False)
+    labour_type_id = db.Column(db.Integer, db.ForeignKey("labour_type_master.id"), nullable=False)
+
+    # Time tracking
+    time_in = db.Column(db.Time, nullable=False)
+    time_out = db.Column(db.Time, nullable=False)
+    break_hours = db.Column(db.Float, default=0)  # Lunch break in hours
+    total_hours = db.Column(db.Float, default=0)  # Auto calculated
+
+    # Production tracking - can have multiple items
+    # This is stored in LabourDailySheetEntryDetail
+
+    # Wage calculation
+    wage_type = db.Column(db.String(20), nullable=False)  # DAILY or PIECE
+    daily_rate = db.Column(db.Float, default=0)
+    total_wages = db.Column(db.Float, default=0)
+
+    labour = db.relationship("LabourMaster")
+    labour_type = db.relationship("LabourTypeMaster")
+    details = db.relationship("LabourDailySheetEntryDetail", backref="entry", cascade="all, delete-orphan")
+
+
+class LabourDailySheetEntryDetail(db.Model):
+    __tablename__ = "labour_daily_sheet_entry_detail"
+
+    id = db.Column(db.Integer, primary_key=True)
+    entry_id = db.Column(db.Integer, db.ForeignKey("labour_daily_sheet_entry.id"), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey("item_master.id"), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe_header.id"), nullable=True)
+
+    # Time on this item
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    hours_worked = db.Column(db.Float, default=0)  # Auto calculated
+
+    # Production quantity
+    qty_produced = db.Column(db.Float, default=0)
+
+    # For piece rate
+    piece_rate = db.Column(db.Float, default=0)
+    piece_wages = db.Column(db.Float, default=0)
+
+    # For daily wage - proportionate wages
+    proportionate_wages = db.Column(db.Float, default=0)
+
+    item = db.relationship("ItemMaster")
+    recipe = db.relationship("RecipeHeader")
+
