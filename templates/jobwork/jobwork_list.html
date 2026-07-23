@@ -2,76 +2,182 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-3">
-
-
-<h2>Job Work Orders</h2>
-
-<a
-href="{{ url_for('jobwork.add_jobwork') }}"
-class="btn btn-success">
-
-New Job Work Order
-
-</a>
-
+<div class="d-flex justify-content-between mb-3 align-items-center">
+    <h2 class="mb-0">
+        <i class="bi bi-tools"></i> Job Work Orders
+    </h2>
+    <div>
+        <a href="{{ url_for('jobwork.jobwork_ledger') }}" class="btn btn-info me-2">
+            <i class="bi bi-journal-text"></i> Job Work Ledger
+        </a>
+        <a href="{{ url_for('jobwork.add_jobwork') }}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> New Job Work Order
+        </a>
+    </div>
 </div>
 
+<table class="table table-bordered table-hover table-striped" id="jobworkTable">
+    <thead class="table-dark">
+        <tr>
+            <th>Job Work No</th>
+            <th>Date</th>
+            <th>Vendor</th>
+            <th>Output Item</th>
+            <th>Planned Qty</th>
+            <th>Status</th>
+            <th width="280">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            <td><b>{{ job.jobwork_no }}</b></td>
+            <td>{{ job.jobwork_date.strftime("%d-%m-%Y") }}</td>
+            <td>{{ job.vendor.vendor_name }}</td>
+            <td>{{ job.output_item.item_name }}</td>
+            <td>{{ "%.3f"|format(job.planned_output_qty) }}</td>
+            <td>
+                <span class="badge 
+                    {% if job.status == 'Open' %}bg-secondary
+                    {% elif job.status == 'Issued' %}bg-primary
+                    {% elif job.status == 'Partially Received' %}bg-warning text-dark
+                    {% elif job.status == 'Received' %}bg-success
+                    {% else %}bg-danger
+                    {% endif %} fs-6">
+                    {{ job.status }}
+                </span>
+            </td>
+            <td>
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="{{ url_for('jobwork.view_jobwork', id=job.id) }}" 
+                       class="btn btn-outline-secondary" title="View">
+                        <i class="bi bi-eye"></i> View
+                    </a>
 
-<table class="table table-bordered">
+                    {% if job.status == 'Open' %}
+                    <a href="{{ url_for('jobwork.jobwork_details', id=job.id) }}" 
+                       class="btn btn-outline-info" title="Edit">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <button type="button" class="btn btn-outline-primary" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#issueModal{{ job.id }}"
+                            title="Issue Materials">
+                        <i class="bi bi-box-arrow-right"></i> Issue
+                    </button>
+                    <button type="button" class="btn btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ job.id }}"
+                            title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    {% endif %}
 
+                    {% if job.status in ['Issued', 'Partially Received'] %}
+                    <a href="{{ url_for('jobwork.receive_jobwork', id=job.id) }}" 
+                       class="btn btn-outline-success" title="Receive">
+                        <i class="bi bi-box-arrow-in-left"></i> Receive
+                    </a>
+                    {% endif %}
 
+                    {% if job.status == 'Received' %}
+                    <a href="{{ url_for('jobwork.view_jobwork', id=job.id) }}" 
+                       class="btn btn-outline-success" title="View Receipts">
+                        <i class="bi bi-check-circle"></i> Completed
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
 
-<thead>
+        <!-- SAP-Style Issue Confirmation Modal -->
+        {% if job.status == 'Open' %}
+        <div class="modal fade" id="issueModal{{ job.id }}" tabindex="-1" 
+             aria-labelledby="issueModalLabel{{ job.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-primary border-2">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="issueModalLabel{{ job.id }}">
+                            <i class="bi bi-exclamation-triangle-fill"></i> 
+                            Confirm Material Issue
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" 
+                                data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <h6><b>Job Work:</b> {{ job.jobwork_no }}</h6>
+                            <h6><b>Vendor:</b> {{ job.vendor.vendor_name }}</h6>
+                            <h6><b>Output:</b> {{ job.output_item.item_name }} 
+                                ({{ "%.3f"|format(job.planned_output_qty) }})</h6>
+                        </div>
+                        <p class="mb-0 text-danger">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <b>This will reduce inventory stock permanently.</b>
+                        </p>
+                        <p class="text-muted small mt-2">
+                            Materials will be issued to the vendor and tracked in Job Work Ledger.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" 
+                                data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                        <form method="POST" 
+                              action="{{ url_for('jobwork.issue_jobwork', id=job.id) }}"
+                              style="display:inline;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> Confirm Issue
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal{{ job.id }}" tabindex="-1"
+             aria-labelledby="deleteModalLabel{{ job.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger border-2">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteModalLabel{{ job.id }}">
+                            <i class="bi bi-trash-fill"></i> Confirm Delete
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white"
+                                data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <h6><b>Job Work:</b> {{ job.jobwork_no }}</h6>
+                            <h6><b>Vendor:</b> {{ job.vendor.vendor_name }}</h6>
+                        </div>
+                        <p class="mb-0 text-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <b>This will delete the job work and reverse all inventory.</b>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                        <form method="POST"
+                              action="{{ url_for('jobwork.delete_jobwork', id=job.id) }}"
+                              style="display:inline;">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
-<tr>
-
-<th>ID</th>
-
-<th>Date</th>
-
-<th>Vendor</th>
-
-<th>Status</th>
-
-<th></th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-{% for job in jobs %}
-
-<tr>
-
-<td>{{ job.id }}</td>
-
-<td>{{ job.jobwork_date }}</td>
-
-<td>{{ job.vendor.vendor_name }}</td>
-
-<td>{{ job.status }}</td>
-
-<td>
-
-<button
-class="btn btn-primary btn-sm">
-
-Open
-
-</button>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
+        {% endfor %}
+    </tbody>
 </table>
 
 {% endblock %}

@@ -109,6 +109,45 @@ Select Job Worker
 
 <label>
 
+Location (From)
+
+</label>
+
+<select
+name="location_id"
+class="form-select"
+required>
+
+<option value="">
+
+Select Location
+
+</option>
+
+{% for loc in locations %}
+
+<option value="{{ loc.id }}">
+
+{{ loc.location_name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<label>
+
 Output Item
 
 </label>
@@ -154,8 +193,6 @@ class="form-control"
 required>
 
 </div>
-
-
 
 <div class="col-md-3">
 

@@ -1645,6 +1645,12 @@ class JobWorkHeader(db.Model):
         nullable=False
     )
 
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey("location_master.id"),
+        nullable=True
+    )
+
     output_item_id = db.Column(
         db.Integer,
         db.ForeignKey("item_master.id"),
@@ -1666,6 +1672,8 @@ class JobWorkHeader(db.Model):
         default="Open"
     )
 
+    # Open -> Issued -> Partially Received -> Received -> Cancelled
+
     remarks = db.Column(
         db.String(300)
     )
@@ -1674,8 +1682,18 @@ class JobWorkHeader(db.Model):
         "VendorMaster"
     )
 
+    location = db.relationship(
+        "LocationMaster"
+    )
+
     output_item = db.relationship(
         "ItemMaster"
+    )
+
+    receipts = db.relationship(
+        "JobWorkReceipt",
+        backref="jobwork",
+        cascade="all, delete-orphan"
     )
 
     
@@ -1739,7 +1757,7 @@ class JobWorkDetail(db.Model):
 
     jobwork = db.relationship(
         "JobWorkHeader",
-        backref="details"
+        backref="jobwork_details"
     )
 
 
@@ -1800,5 +1818,149 @@ class JobWorkLedger(db.Model):
     )
 
     jobwork = db.relationship(
-        "JobWorkHeader"
+        "JobWorkHeader",
+        backref="ledger"
+    )
+
+class JobWorkReceipt(db.Model):
+
+    __tablename__ = "job_work_receipt"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    receipt_no = db.Column(
+        db.String(30),
+        unique=True,
+        nullable=False
+    )
+
+    receipt_date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    job_work_id = db.Column(
+        db.Integer,
+        db.ForeignKey("job_work_header.id"),
+        nullable=False
+    )
+
+    location_id = db.Column(
+        db.Integer,
+        db.ForeignKey("location_master.id"),
+        nullable=False
+    )
+
+    output_qty_received = db.Column(
+        db.Float,
+        default=0
+    )
+
+    output_qty_rejected = db.Column(
+        db.Float,
+        default=0
+    )
+
+    scrap_qty_received = db.Column(
+        db.Float,
+        default=0
+    )
+
+    job_work_cost = db.Column(
+        db.Float,
+        default=0
+    )
+
+    total_cost = db.Column(
+        db.Float,
+        default=0
+    )
+
+    remarks = db.Column(
+        db.String(500)
+    )
+
+    location = db.relationship(
+        "LocationMaster"
+    )
+
+    details = db.relationship(
+        "JobWorkReceiptDetail",
+        backref="receipt",
+        cascade="all, delete-orphan"
+    )
+
+
+class JobWorkReceiptDetail(db.Model):
+
+    __tablename__ = "job_work_receipt_detail"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    job_work_receipt_id = db.Column(
+        db.Integer,
+        db.ForeignKey("job_work_receipt.id"),
+        nullable=False
+    )
+
+    job_work_detail_id = db.Column(
+        db.Integer,
+        db.ForeignKey("job_work_detail.id"),
+        nullable=False
+    )
+
+    item_id = db.Column(
+        db.Integer,
+        db.ForeignKey("item_master.id"),
+        nullable=False
+    )
+
+    line_type = db.Column(
+        db.String(20),
+        nullable=False
+    )
+    # INPUT
+    # SCRAP
+
+    issued_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    received_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    rejected_qty = db.Column(
+        db.Float,
+        default=0
+    )
+
+    rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    value = db.Column(
+        db.Float,
+        default=0
+    )
+
+    remarks = db.Column(
+        db.String(250)
+    )
+
+    item = db.relationship(
+        "ItemMaster"
+    )
+
+    job_work_detail = db.relationship(
+        "JobWorkDetail"
     )

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3 align-items-center">
+    <h2 class="mb-0">
+        <i class="bi bi-journal-text"></i> Job Work Inventory Ledger
+    </h2>
+    <div>
+        <a href="{{ url_for('jobwork.jobwork_list') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Job Work
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> 
+    This ledger shows all materials currently issued to vendors (pending receipt).
+    Items with <b>Balance Qty > 0</b> are highlighted.
+</div>
+
+<table class="table table-bordered table-hover" id="ledgerTable">
+    <thead class="table-dark">
+        <tr>
+            <th>Job Work No</th>
+            <th>Vendor</th>
+            <th>Item</th>
+            <th>Type</th>
+            <th class="text-end">Issued Qty</th>
+            <th class="text-end">Received Qty</th>
+            <th class="text-end">Balance Qty</th>
+            <th class="text-end">Issued Rate</th>
+            <th class="text-end">Issued Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in ledger %}
+        <tr class="{% if row.balance_qty > 0 %}table-warning fw-bold{% endif %}">
+            <td>
+                <a href="{{ url_for('jobwork.view_jobwork', id=row.jobwork.id) }}">
+                    {{ row.jobwork.jobwork_no }}
+                </a>
+            </td>
+            <td>{{ row.jobwork.vendor.vendor_name }}</td>
+            <td>{{ row.item.item_code }} - {{ row.item.item_name }}</td>
+            <td>
+                <span class="badge {% if row.line_type == 'INPUT' %}bg-primary{% else %}bg-secondary{% endif %}">
+                    {{ row.line_type }}
+                </span>
+            </td>
+            <td class="text-end">{{ "%.3f"|format(row.issued_qty) }}</td>
+            <td class="text-end">{{ "%.3f"|format(row.received_qty) }}</td>
+            <td class="text-end">
+                {% if row.balance_qty > 0 %}
+                    <span class="text-danger">{{ "%.3f"|format(row.balance_qty) }}</span>
+                {% else %}
+                    {{ "%.3f"|format(row.balance_qty) }}
+                {% endif %}
+            </td>
+            <td class="text-end">{{ "%.2f"|format(row.issued_rate) }}</td>
+            <td class="text-end">{{ "%.2f"|format(row.issued_value) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

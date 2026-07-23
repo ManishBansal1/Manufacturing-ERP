@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+    <div class="card shadow border-success">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-box-arrow-in-left"></i> 
+                Receive Job Work - {{ job.jobwork_no }}
+            </h4>
+        </div>
+        <div class="card-body">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Job Worker</h6>
+                            <h5>{{ job.vendor.vendor_name }}</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Output Item</h6>
+                            <h5>{{ job.output_item.item_name }}</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <h6 class="text-info">Already Received</h6>
+                            <h3>{{ "%.3f"|format(already_received) }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h6 class="text-warning">Balance to Receive</h6>
+                            <h3>{{ "%.3f"|format(balance_to_receive) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Receipt No *</label>
+                        <input type="text" name="receipt_no" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Receipt Date *</label>
+                        <input type="date" name="receipt_date" class="form-control" 
+                               value="{{ today }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Receive Location *</label>
+                        <select name="location_id" class="form-select" required>
+                            <option value="">Select Location</option>
+                            {% for loc in locations %}
+                            <option value="{{ loc.id }}">{{ loc.location_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Output Section -->
+                <h5 class="text-success mb-3">
+                    <i class="bi bi-box-seam"></i> Output Received
+                </h5>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Output Qty Received *</label>
+                        <input type="number" step="0.001" name="output_qty_received" 
+                               class="form-control" max="{{ balance_to_receive }}"
+                               placeholder="Max: {{ "%.3f"|format(balance_to_receive) }}"
+                               required>
+                        <small class="text-muted">Maximum allowed: {{ "%.3f"|format(balance_to_receive) }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Output Qty Rejected</label>
+                        <input type="number" step="0.001" name="output_qty_rejected" 
+                               class="form-control" value="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Job Work Cost / Unit</label>
+                        <input type="number" step="0.01" name="job_work_cost" 
+                               class="form-control" value="{{ job.job_work_cost or 0 }}">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Materials at Vendor -->
+                <h5 class="text-primary mb-3">
+                    <i class="bi bi-journal-text"></i> Materials at Vendor
+                </h5>
+                <table class="table table-bordered table-sm">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Item</th>
+                            <th>Type</th>
+                            <th>Issued Qty</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in jw_ledger %}
+                        <tr>
+                            <td>{{ row.item.item_name }}</td>
+                            <td>
+                                <span class="badge {% if row.line_type == 'INPUT' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ row.line_type }}
+                                </span>
+                            </td>
+                            <td>{{ "%.3f"|format(row.issued_qty) }}</td>
+                            <td><b>{{ "%.3f"|format(row.balance_qty) }}</b></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <hr class="my-4">
+
+                <!-- Scrap Section -->
+                <h5 class="text-secondary mb-3">
+                    <i class="bi bi-recycle"></i> Scrap Received
+                </h5>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Scrap Qty Received</label>
+                        <input type="number" step="0.001" name="scrap_qty_received" 
+                               class="form-control" value="0">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Remarks</label>
+                        <textarea name="remarks" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-lg"></i> Save Receipt
+                    </button>
+                    <a href="{{ url_for('jobwork.jobwork_list') }}" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

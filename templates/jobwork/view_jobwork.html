@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0">
+                    <i class="bi bi-eye"></i> Job Work Order - View
+                </h4>
+                <small class="text-light">{{ job.jobwork_no }}</small>
+            </div>
+            <span class="badge 
+                {% if job.status == 'Open' %}bg-secondary
+                {% elif job.status == 'Issued' %}bg-primary
+                {% elif job.status == 'Partially Received' %}bg-warning text-dark
+                {% elif job.status == 'Received' %}bg-success
+                {% else %}bg-danger
+                {% endif %} fs-5">
+                {{ job.status }}
+            </span>
+        </div>
+        <div class="card-body">
+            <!-- Header Info -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="text-muted">Job Worker</h6>
+                            <h5>{{ job.vendor.vendor_name }}</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="text-muted">Date</h6>
+                            <h5>{{ job.jobwork_date.strftime("%d-%m-%Y") }}</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="text-muted">Expected Return</h6>
+                            <h5>
+                                {% if job.expected_return_date %}
+                                    {{ job.expected_return_date.strftime("%d-%m-%Y") }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="text-muted">Remarks</h6>
+                            <h5>{{ job.remarks or '-' }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-primary">
+                        <div class="card-body text-center">
+                            <h6 class="text-primary">Output Item</h6>
+                            <h5>{{ job.output_item.item_code }}</h5>
+                            <p class="mb-0">{{ job.output_item.item_name }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <h6 class="text-info">Planned Qty</h6>
+                            <h3>{{ "%.3f"|format(job.planned_output_qty) }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <h6 class="text-success">Received Qty</h6>
+                            <h3>{{ "%.3f"|format(already_received) }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h6 class="text-warning">Balance Qty</h6>
+                            <h3>{{ "%.3f"|format(balance_to_receive) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Materials -->
+            <h5 class="border-bottom pb-2 mb-3">
+                <i class="bi bi-box-seam"></i> Input Materials Issued
+            </h5>
+            <table class="table table-bordered table-sm">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Item</th>
+                        <th>Expected Qty</th>
+                        <th>Rate</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in job.details %}
+                    {% if detail.line_type == 'INPUT' %}
+                    <tr>
+                        <td>{{ detail.item.item_code }} - {{ detail.item.item_name }}</td>
+                        <td>{{ "%.3f"|format(detail.expected_qty) }}</td>
+                        <td>{{ "%.2f"|format(detail.rate or 0) }}</td>
+                        <td>{{ "%.2f"|format(detail.value or 0) }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Scrap -->
+            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                <i class="bi bi-recycle"></i> Scrap Expected
+            </h5>
+            <table class="table table-bordered table-sm">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Item</th>
+                        <th>Expected Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in job.details %}
+                    {% if detail.line_type == 'SCRAP' %}
+                    <tr>
+                        <td>{{ detail.item.item_code }} - {{ detail.item.item_name }}</td>
+                        <td>{{ "%.3f"|format(detail.expected_qty) }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Receipts History -->
+            {% if job.receipts %}
+            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                <i class="bi bi-clock-history"></i> Receipt History
+            </h5>
+            <table class="table table-bordered table-sm table-striped">
+                <thead class="table-success">
+                    <tr>
+                        <th>Receipt No</th>
+                        <th>Date</th>
+                        <th>Output Received</th>
+                        <th>Rejected</th>
+                        <th>Scrap</th>
+                        <th>Job Cost</th>
+                        <th>Total Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receipt in job.receipts %}
+                    <tr>
+                        <td>{{ receipt.receipt_no }}</td>
+                        <td>{{ receipt.receipt_date.strftime("%d-%m-%Y") }}</td>
+                        <td>{{ "%.3f"|format(receipt.output_qty_received) }}</td>
+                        <td>{{ "%.3f"|format(receipt.output_qty_rejected) }}</td>
+                        <td>{{ "%.3f"|format(receipt.scrap_qty_received) }}</td>
+                        <td>{{ "%.2f"|format(receipt.job_work_cost) }}</td>
+                        <td>{{ "%.2f"|format(receipt.total_cost) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            <!-- Job Work Ledger -->
+            {% if job.ledger %}
+            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                <i class="bi bi-journal-text"></i> Job Work Ledger
+            </h5>
+            <table class="table table-bordered table-sm">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Item</th>
+                        <th>Type</th>
+                        <th>Issued</th>
+                        <th>Received</th>
+                        <th>Balance</th>
+                        <th>Rate</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for led in job.ledger %}
+                    <tr {% if led.balance_qty > 0 %}class="table-warning"{% endif %}>
+                        <td>{{ led.item.item_name }}</td>
+                        <td>{{ led.line_type }}</td>
+                        <td>{{ "%.3f"|format(led.issued_qty) }}</td>
+                        <td>{{ "%.3f"|format(led.received_qty) }}</td>
+                        <td><b>{{ "%.3f"|format(led.balance_qty) }}</b></td>
+                        <td>{{ "%.2f"|format(led.issued_rate) }}</td>
+                        <td>{{ "%.2f"|format(led.issued_value) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="{{ url_for('jobwork.jobwork_list') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                {% if job.status in ['Issued', 'Partially Received'] %}
+                <a href="{{ url_for('jobwork.receive_jobwork', id=job.id) }}" 
+                   class="btn btn-success">
+                    <i class="bi bi-box-arrow-in-left"></i> Receive Goods
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -26,8 +26,20 @@ def update_inventory_cost(item_id):
 
         if row.qty_in > 0:
 
+            # Handle JOB_WORK_ISSUE (treat same as normal issue)
+            # No special handling needed - it uses qty_out already
+            
+            # Handle JOB_WORK_RECEIPT (treat as purchase/production)
+            if row.reference_type == "JOB_WORK_RECEIPT":
+                        # Cost is already calculated and stored in value_in
+                if row.qty_in > 0:
+                    row.unit_cost = row.value_in / row.qty_in if row.qty_in > 0 else 0
+                #running_qty += (row.qty_in or 0)
+                #running_value += (row.value_in or 0)
+            
+
             # Opening Stock / Purchase / Stock Adjustment etc.
-            if row.reference_type != "PRODUCTION":
+            elif row.reference_type != "PRODUCTION":
 
                 if row.reference_type == "ADJUSTMENT":
 
@@ -138,6 +150,9 @@ def update_inventory_cost(item_id):
             running_qty -= (row.qty_out or 0)
 
             running_value -= (row.value_out or 0)
+
+
+        
 
         row.running_qty = running_qty
 
