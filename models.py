@@ -120,12 +120,6 @@ class ItemMaster(db.Model):
     default=18
     )
 
-    piece_rate = db.Column(
-        db.Float,
-        default=0,
-        nullable=True
-    )
-
     active = db.Column(
         db.Boolean,
         default=True
@@ -2025,10 +2019,10 @@ class LabourMaster(db.Model):
     # Work Details
     labour_type_id = db.Column(db.Integer, db.ForeignKey("labour_type_master.id"), nullable=False)
     contractor_id = db.Column(db.Integer, db.ForeignKey("labour_contractor_master.id"), nullable=False)
-    location_id = db.Column(db.Integer, db.ForeignKey("location_master.id"), nullable=False)
+    #location_id = db.Column(db.Integer, db.ForeignKey("location_master.id"), nullable=False)
 
     # Rate Details
-    wage_type = db.Column(db.String(20), nullable=False, default="DAILY")
+    #wage_type = db.Column(db.String(20), nullable=False, default="DAILY")
     # DAILY = Daily wages
     # PIECE = Piece rate
 
@@ -2041,7 +2035,7 @@ class LabourMaster(db.Model):
     active = db.Column(db.Boolean, default=True)
 
     labour_type = db.relationship("LabourTypeMaster")
-    location = db.relationship("LocationMaster")
+    #location = db.relationship("LocationMaster")
 
     # Add piece_rate to ItemMaster - we'll handle this via migration
 

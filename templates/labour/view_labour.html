@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+<div class="card shadow">
+
+<div class="card-header bg-primary text-white">
+
+<h4>
+
+View Labour
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-3">
+
+<b>Labour Code</b><br>
+
+{{ labour.labour_code }}
+
+</div>
+
+<div class="col-md-5">
+
+<b>Name</b><br>
+
+{{ labour.labour_name }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Father Name</b><br>
+
+{{ labour.father_name }}
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<b>Gender</b><br>
+
+{{ labour.gender }}
+
+</div>
+
+<div class="col-md-3">
+
+<b>Date of Birth</b><br>
+
+{% if labour.date_of_birth %}
+{{ labour.date_of_birth.strftime("%d-%m-%Y") }}
+{% endif %}
+
+</div>
+
+<div class="col-md-2">
+
+<b>Age</b><br>
+
+{{ labour.age }}
+
+</div>
+
+<div class="col-md-2">
+
+<b>Blood Group</b><br>
+
+{{ labour.blood_group }}
+
+</div>
+
+<div class="col-md-2">
+
+<b>Aadhar</b><br>
+
+{{ labour.aadhar_no }}
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>Mobile</b><br>
+
+{{ labour.mobile }}
+
+</div>
+
+<div class="col-md-8">
+
+<b>Address</b><br>
+
+{{ labour.address }}
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>City</b><br>
+
+{{ labour.city }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>State</b><br>
+
+{{ labour.state }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Pincode</b><br>
+
+{{ labour.pincode }}
+
+</div>
+
+</div>
+
+<hr>
+
+<h5 class="text-primary">
+
+Work Details
+
+</h5>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>Labour Type</b><br>
+
+{{ labour.labour_type.type_name }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Contractor</b><br>
+
+{{ labour.contractor.contractor_name }}
+
+</div>
+
+
+
+</div>
+
+<hr>
+
+<h5 class="text-primary">
+
+Rate Details
+
+</h5>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>Wage Type</b><br>
+
+{{ labour.wage_type }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Daily Wage</b><br>
+
+₹ {{ "%.2f"|format(labour.daily_wage_rate) }}
+
+</div>
+
+<div class="col-md-4">
+
+<b>Contractor Rate</b><br>
+
+₹ {{ "%.2f"|format(labour.contractor_rate) }}
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<b>Status</b><br>
+
+{% if labour.active %}
+
+<span class="badge bg-success">
+
+Active
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Inactive
+
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+<br>
+
+<a
+href="{{ url_for('labour.edit_labour',id=labour.id) }}"
+class="btn btn-warning">
+
+Edit
+
+</a>
+
+<a
+href="{{ url_for('labour.labour_master_list') }}"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

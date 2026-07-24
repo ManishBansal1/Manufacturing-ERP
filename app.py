@@ -16,6 +16,8 @@ from blueprints.sales import sales_bp
 
 from blueprints.jobwork.routes import jobwork_bp
 
+from blueprints.labour.routes import labour_bp
+
 
 app = Flask(__name__)
 
@@ -34,7 +36,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(masters_bp)
 app.register_blueprint(jobwork_bp)
-
+app.register_blueprint(labour_bp)
 
 @login_manager.user_loader
 def load_user(user_id):

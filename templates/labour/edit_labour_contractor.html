@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-3">
+
+<div class="card shadow">
+
+<div class="card-header bg-warning text-dark">
+
+<h4 class="mb-0">
+
+Edit Labour Contractor
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+Contractor Code
+
+</label>
+
+<input
+type="text"
+name="contractor_code"
+class="form-control"
+value="{{ contractor.contractor_code }}"
+required>
+
+</div>
+
+<div class="col-md-9 mb-3">
+
+<label class="form-label">
+
+Contractor Name
+
+</label>
+
+<input
+type="text"
+name="contractor_name"
+class="form-control"
+value="{{ contractor.contractor_name }}"
+required>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">
+
+Contact Person
+
+</label>
+
+<input
+type="text"
+name="contact_person"
+class="form-control"
+value="{{ contractor.contact_person or '' }}">
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">
+
+Mobile
+
+</label>
+
+<input
+type="text"
+name="mobile"
+class="form-control"
+value="{{ contractor.mobile or '' }}">
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">
+
+Email
+
+</label>
+
+<input
+type="email"
+name="email"
+class="form-control"
+value="{{ contractor.email or '' }}">
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+GST No
+
+</label>
+
+<input
+type="text"
+name="gst_no"
+class="form-control"
+value="{{ contractor.gst_no or '' }}">
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+PAN No
+
+</label>
+
+<input
+type="text"
+name="pan_no"
+class="form-control"
+value="{{ contractor.pan_no or '' }}">
+
+</div>
+
+</div>
+
+<div class="mb-3">
+
+<label class="form-label">
+
+Address
+
+</label>
+
+<textarea
+name="address"
+rows="3"
+class="form-control">{{ contractor.address or '' }}</textarea>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">
+
+City
+
+</label>
+
+<input
+type="text"
+name="city"
+class="form-control"
+value="{{ contractor.city or '' }}">
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">
+
+State
+
+</label>
+
+<input
+type="text"
+name="state"
+class="form-control"
+value="{{ contractor.state or '' }}">
+
+</div>
+
+</div>
+
+<div class="form-check mb-3">
+
+<input
+class="form-check-input"
+type="checkbox"
+name="active"
+id="active"
+{% if contractor.active %}checked{% endif %}>
+
+<label
+class="form-check-label"
+for="active">
+
+Active
+
+</label>
+
+</div>
+
+<button
+type="submit"
+class="btn btn-primary">
+
+Update Contractor
+
+</button>
+
+<a
+href="{{ url_for('labour.labour_contractors') }}"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

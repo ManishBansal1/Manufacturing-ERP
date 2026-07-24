@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-3">
+
+<div class="card shadow">
+
+<div class="card-header bg-info text-white">
+
+<h4>View Labour Contractor</h4>
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<tr>
+
+<th width="25%">Code</th>
+
+<td>{{ contractor.contractor_code }}</td>
+
+</tr>
+
+<tr>
+
+<th>Name</th>
+
+<td>{{ contractor.contractor_name }}</td>
+
+</tr>
+
+<tr>
+
+<th>Contact Person</th>
+
+<td>{{ contractor.contact_person }}</td>
+
+</tr>
+
+<tr>
+
+<th>Mobile</th>
+
+<td>{{ contractor.mobile }}</td>
+
+</tr>
+
+<tr>
+
+<th>Email</th>
+
+<td>{{ contractor.email }}</td>
+
+</tr>
+
+<tr>
+
+<th>GST No</th>
+
+<td>{{ contractor.gst_no }}</td>
+
+</tr>
+
+<tr>
+
+<th>PAN No</th>
+
+<td>{{ contractor.pan_no }}</td>
+
+</tr>
+
+<tr>
+
+<th>Address</th>
+
+<td>{{ contractor.address }}</td>
+
+</tr>
+
+<tr>
+
+<th>City</th>
+
+<td>{{ contractor.city }}</td>
+
+</tr>
+
+<tr>
+
+<th>State</th>
+
+<td>{{ contractor.state }}</td>
+
+</tr>
+
+<tr>
+
+<th>Status</th>
+
+<td>
+
+{% if contractor.active %}
+
+<span class="badge bg-success">
+
+Active
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Inactive
+
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+</table>
+
+<a href="{{ url_for('labour.labour_contractors') }}"
+class="btn btn-secondary">
+
+Back
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

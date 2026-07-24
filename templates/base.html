@@ -349,6 +349,21 @@
                 <i class="bi bi-pin-map"></i> Destination Master
             </a>
         </li>
+                <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('labour.labour_types') }}">
+                <i class="bi bi-tools"></i> Labour Type Master
+            </a>
+        </li>
+                <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('labour.labour_contractors') }}">
+                <i class="bi bi-tools"></i> Labour Contractor Master
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('labour.labour_master_list') }}">
+                <i class="bi bi-tools"></i> Labour Master
+            </a>
+        </li>
     </ul>
 
     <div class="nav-section">Inventory</div>
@@ -410,6 +425,11 @@
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('jobwork.jobwork_list') }}">
                 <i class="bi bi-tools"></i> Job Work
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('labour.daily_sheet_list') }}">
+                <i class="bi bi-tools"></i> Labour Daily Sheet
             </a>
         </li>
     </ul>
